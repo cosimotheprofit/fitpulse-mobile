@@ -1,0 +1,36 @@
+{
+  "title": "Push Day (Hypertrophy)",
+  "date": "2026-09-20",
+  "notes": "Controlled eccentrics. Rest 90s between compound sets.",
+  "exercises": [
+    {
+      "name": "Barbell Bench Press",
+      "muscle_group": "Chest",
+      "target_sets": 4,
+      "target_reps": "6-8",
+      "target_weight": 185,
+      "notes": "Warm up with bar, 95, 135"
+    },
+    {
+      "name": "Incline Dumbbell Press",
+      "muscle_group": "Chest",
+      "target_sets": 3,
+      "target_reps": "8-10",
+      "target_weight": 65
+    },
+    {
+      "name": "Cable Lateral Raise",
+      "muscle_group": "Shoulders",
+      "target_sets": 4,
+      "target_reps": "12-15",
+      "target_weight": 25
+    },
+    {
+      "name": "Tricep Rope Pushdown",
+      "muscle_group": "Arms",
+      "target_sets": 3,
+      "target_reps": "10-12",
+      "target_weight": 55
+    }
+  ]
+}
