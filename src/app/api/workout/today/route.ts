@@ -100,13 +100,13 @@ const SCHEDULED_ROUTINES: Record<
         aliases: ["Barbell Bent-Over Row"],
       },
       {
-        name: "Incline Dumbbell Press",
-        muscle_group: "Chest",
+        name: "Dumbbell Shoulder Press",
+        muscle_group: "Shoulders",
         target_sets: 3,
         target_reps: "8-10",
-        default_weight: 45,
-        notes: "Replaces squats today to rest quads. 30° incline, deep stretch on upper chest",
-        aliases: ["Incline Bench"],
+        default_weight: 30,
+        notes: "Replaces squats today to rest quads. Deep stretch to collarbone, press overhead for 3D delts",
+        aliases: ["DB Shoulder Press", "Overhead Dumbbell Press", "Dumbbell Overhead Press"],
       },
       {
         name: "Cable Lateral Raise",
