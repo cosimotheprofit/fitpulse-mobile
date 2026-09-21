@@ -80,7 +80,7 @@ const SCHEDULED_ROUTINES: Record<
   A_UPPER: {
     code: "A_UPPER",
     title: "Workout A (Upper Mass · Legs Rested)",
-    notes: "Chest Mass & Incline Stretch, Back Density, 3D Delts & Arms (Hack Squats swapped for Incline DB Press & Tricep Pushdowns)",
+    notes: "Chest Mass, Back Density, 3D Delts & Arms (Hack Squats swapped for Tricep Rope Pushdowns)",
     exercises: [
       {
         name: "Barbell Bench Press",
@@ -100,13 +100,13 @@ const SCHEDULED_ROUTINES: Record<
         aliases: ["Barbell Bent-Over Row"],
       },
       {
-        name: "Incline Dumbbell Press",
-        muscle_group: "Chest",
+        name: "Tricep Rope Pushdown",
+        muscle_group: "Arms",
         target_sets: 3,
-        target_reps: "8-10",
-        default_weight: 45,
-        notes: "30° bench incline, deep stretch on upper clavicular pecs, avoid front-delt burnout",
-        aliases: ["Incline DB Press", "Incline Dumbbell Press (30°)"],
+        target_reps: "10-12",
+        default_weight: 40,
+        notes: "Flare rope at bottom, lock out triceps to balance bicep volume",
+        aliases: ["Tricep Pushdown", "Tricep Rope Pushdowns"],
       },
       {
         name: "Cable Lateral Raise",
@@ -133,15 +133,6 @@ const SCHEDULED_ROUTINES: Record<
         default_weight: 35,
         notes: "Supinate at top, strict eccentric for bicep peak",
         aliases: ["Bicep Curl", "Dumbbell Bicep Curl", "Bicep Curls (DB or Cable)"],
-      },
-      {
-        name: "Tricep Rope Pushdown",
-        muscle_group: "Arms",
-        target_sets: 3,
-        target_reps: "10-12",
-        default_weight: 40,
-        notes: "Flare rope at bottom, lock out triceps to balance bicep volume",
-        aliases: ["Tricep Pushdown", "Tricep Rope Pushdowns"],
       },
     ],
   },

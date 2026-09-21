@@ -555,7 +555,7 @@ export default function MobileGymApp() {
                 onClick={() => handleLoadRoutine("A_UPPER")}
                 className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-zinc-950 font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 transition-all text-xs"
               >
-                <Play className="w-4 h-4 fill-zinc-950" /> Start Monday: Upper Mass A (Bench &amp; Incline DB)
+                <Play className="w-4 h-4 fill-zinc-950" /> Start Monday: Upper Mass A (Bench, Rows &amp; Arms)
               </button>
               <button
                 onClick={() => handleLoadRoutine("B")}
