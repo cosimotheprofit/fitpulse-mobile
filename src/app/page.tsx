@@ -552,10 +552,10 @@ export default function MobileGymApp() {
             </p>
             <div className="flex flex-col gap-2.5 w-full max-w-xs">
               <button
-                onClick={() => handleLoadRoutine("A")}
+                onClick={() => handleLoadRoutine("A_UPPER")}
                 className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-zinc-950 font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 transition-all text-xs"
               >
-                <Play className="w-4 h-4 fill-zinc-950" /> Start Workout A (Bench, Rows &amp; Hack Squat)
+                <Play className="w-4 h-4 fill-zinc-950" /> Start Monday: Upper Mass A (Bench &amp; Incline)
               </button>
               <button
                 onClick={() => handleLoadRoutine("B")}
@@ -606,10 +606,10 @@ export default function MobileGymApp() {
 
             <div className="flex flex-col gap-2 w-full max-w-xs">
               <button
-                onClick={() => handleLoadRoutine("A")}
+                onClick={() => handleLoadRoutine("A_UPPER")}
                 className="w-full py-2.5 px-4 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold rounded-xl border border-emerald-500/30 text-xs transition-all flex items-center justify-center gap-1.5"
               >
-                <Play className="w-3.5 h-3.5 fill-emerald-300" /> Start Next: Workout A (Hack Squats)
+                <Play className="w-3.5 h-3.5 fill-emerald-300" /> Start Next: Upper Mass A (Legs Rested)
               </button>
               <button
                 onClick={() => {

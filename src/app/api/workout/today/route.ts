@@ -77,6 +77,65 @@ const SCHEDULED_ROUTINES: Record<
       },
     ],
   },
+  A_UPPER: {
+    code: "A_UPPER",
+    title: "Workout A (Upper Mass · Legs Rested)",
+    notes: "Chest Mass, Back Density & Delts (Hack Squats swapped for Incline DB Press to rest legs)",
+    exercises: [
+      {
+        name: "Barbell Bench Press",
+        muscle_group: "Chest",
+        target_sets: 3,
+        target_reps: "6-10",
+        default_weight: 135,
+        notes: "Controlled 3s eccentric, touch mid-chest, drive up with leg drive",
+      },
+      {
+        name: "Dumbbell Bent-Over Row",
+        muscle_group: "Back",
+        target_sets: 3,
+        target_reps: "10",
+        default_weight: 45,
+        notes: "Support on bench or hinge, pull DB to hip with full lat stretch at bottom",
+        aliases: ["Barbell Bent-Over Row"],
+      },
+      {
+        name: "Incline Dumbbell Press",
+        muscle_group: "Chest",
+        target_sets: 3,
+        target_reps: "8-10",
+        default_weight: 45,
+        notes: "Replaces squats today to rest quads. 30° incline, deep stretch on upper chest",
+        aliases: ["Incline Bench"],
+      },
+      {
+        name: "Cable Lateral Raise",
+        muscle_group: "Shoulders",
+        target_sets: 3,
+        target_reps: "12-15",
+        default_weight: 15,
+        notes: "Scapular plane (30° forward), smooth continuous cable tension",
+        aliases: ["Dumbbell Lateral Raise", "Cable Lateral Raises"],
+      },
+      {
+        name: "Cable Rear Delt Fly",
+        muscle_group: "Shoulders",
+        target_sets: 3,
+        target_reps: "12-15",
+        default_weight: 20,
+        notes: "Reach wide to sides, squeeze posterior deltoids",
+      },
+      {
+        name: "Barbell Bicep Curl",
+        muscle_group: "Arms",
+        target_sets: 3,
+        target_reps: "10-12",
+        default_weight: 35,
+        notes: "Supinate at top, strict eccentric for bicep peak",
+        aliases: ["Bicep Curl", "Dumbbell Bicep Curl", "Bicep Curls (DB or Cable)"],
+      },
+    ],
+  },
   B: {
     code: "B",
     title: "Full Body B (Incline & Pull-ups)",
@@ -318,7 +377,9 @@ export async function GET(req: NextRequest) {
     let isVacation = false;
 
     if (!routineKey) {
-      if (todayStr === "2026-09-24") {
+      if (todayStr === "2026-09-21") {
+        routineKey = "A_UPPER"; // Monday Sep 21: Upper Body Mass (legs resting after overnight session 30)
+      } else if (todayStr === "2026-09-24") {
         routineKey = "LEGS"; // Pre-vacation leg overload
       } else if (todayStr >= "2026-09-25" && todayStr <= "2026-09-29") {
         isVacation = true;
