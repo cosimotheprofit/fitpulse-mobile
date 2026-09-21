@@ -82,7 +82,14 @@ export default function BodyTab() {
   }
 
   const diffToGoal = latest ? Math.round((latest.weight_lbs - targetWeight) * 10) / 10 : 0;
-  const displayedHistory = timeframe > 0 ? history.slice(0, timeframe) : history;
+  const cutoffDate = timeframe > 0 && latest
+    ? (() => {
+        const d = new Date(latest.date + "T00:00:00");
+        d.setDate(d.getDate() - (timeframe - 1));
+        return d.toISOString().split("T")[0];
+      })()
+    : null;
+  const displayedHistory = cutoffDate ? history.filter((h) => h.date >= cutoffDate) : history;
   const startWeight = displayedHistory.length > 0 ? displayedHistory[displayedHistory.length - 1].weight_lbs : null;
   const currentWeight = displayedHistory.length > 0 ? displayedHistory[0].weight_lbs : null;
   const timeframeDelta = currentWeight && startWeight ? Math.round((currentWeight - startWeight) * 10) / 10 : null;
