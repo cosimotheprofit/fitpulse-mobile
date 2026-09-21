@@ -271,23 +271,30 @@ export async function GET(req: NextRequest) {
       clientDateParam ||
       new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local time
 
-    // 1. Check for active session in workout_sessions (end_time IS NULL)
-    const activeSessionRes = await db.execute(`
-      SELECT * FROM workout_sessions 
-      WHERE end_time IS NULL 
-      ORDER BY start_time DESC 
-      LIMIT 1
-    `);
+    let sessionRow = null;
 
-    let sessionRow = activeSessionRes.rows[0];
+    // Only look up existing DB sessions if user did not explicitly request a specific routine override
+    if (!requestedRoutine) {
+      // 1. Check for active session in workout_sessions (end_time IS NULL)
+      const activeSessionRes = await db.execute(`
+        SELECT * FROM workout_sessions 
+        WHERE end_time IS NULL 
+        ORDER BY start_time DESC 
+        LIMIT 1
+      `);
 
-    // 2. If no active session, check for a completed session specifically from today
-    if (!sessionRow) {
-      const todaySessionRes = await db.execute({
-        sql: `SELECT * FROM workout_sessions WHERE (start_time LIKE ? OR end_time LIKE ?) AND end_time IS NOT NULL ORDER BY id DESC LIMIT 1`,
-        args: [`${todayStr}%`, `${todayStr}%`],
-      });
-      sessionRow = todaySessionRes.rows[0];
+      sessionRow = activeSessionRes.rows[0];
+
+      // 2. If no active session, check for a completed session specifically STARTED today
+      // (Note: Do not check end_time, because a midnight/late-night workout started on the previous day
+      // should not hijack the following day's schedule)
+      if (!sessionRow) {
+        const todaySessionRes = await db.execute({
+          sql: `SELECT * FROM workout_sessions WHERE start_time LIKE ? AND end_time IS NOT NULL ORDER BY id DESC LIMIT 1`,
+          args: [`${todayStr}%`],
+        });
+        sessionRow = todaySessionRes.rows[0];
+      }
     }
 
     // If an active session or a session completed TODAY exists, return it
