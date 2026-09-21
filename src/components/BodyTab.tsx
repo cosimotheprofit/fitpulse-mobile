@@ -17,6 +17,7 @@ export default function BodyTab() {
   const [latest, setLatest] = useState<BodyRecord | null>(null);
   const [targetWeight, setTargetWeight] = useState<number>(177);
   const [loading, setLoading] = useState(true);
+  const [timeframe, setTimeframe] = useState<number>(14); // 2-week (14-day) view default
 
   // Quick Add Modal
   const [showAddModal, setShowAddModal] = useState(false);
@@ -81,6 +82,10 @@ export default function BodyTab() {
   }
 
   const diffToGoal = latest ? Math.round((latest.weight_lbs - targetWeight) * 10) / 10 : 0;
+  const displayedHistory = timeframe > 0 ? history.slice(0, timeframe) : history;
+  const startWeight = displayedHistory.length > 0 ? displayedHistory[displayedHistory.length - 1].weight_lbs : null;
+  const currentWeight = displayedHistory.length > 0 ? displayedHistory[0].weight_lbs : null;
+  const timeframeDelta = currentWeight && startWeight ? Math.round((currentWeight - startWeight) * 10) / 10 : null;
 
   return (
     <div className="space-y-4 pb-24">
@@ -131,11 +136,53 @@ export default function BodyTab() {
         </div>
       )}
 
-      {/* Recent Weigh-ins Table */}
+      {/* Timeframe Filter Buttons */}
       <div className="space-y-2">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Weigh-in History</h3>
+        <div className="flex items-center justify-between gap-2 pt-1">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Weigh-in History</h3>
+          <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl text-[11px]">
+            {[
+              { label: "2W", days: 14 },
+              { label: "1M", days: 30 },
+              { label: "3M", days: 90 },
+              { label: "All", days: 0 },
+            ].map((item) => (
+              <button
+                key={item.days}
+                onClick={() => setTimeframe(item.days)}
+                className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+                  timeframe === item.days
+                    ? "bg-purple-600 text-white shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {timeframeDelta !== null && (
+          <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-xl px-3.5 py-2 flex items-center justify-between text-xs">
+            <span className="text-zinc-400 text-[11px] font-semibold">
+              {timeframe === 14 ? "2-Week Net Change:" : `${timeframe === 0 ? "All Time" : `${timeframe}D`} Net Change:`}
+            </span>
+            <span
+              className={`font-bold ${
+                timeframeDelta > 0
+                  ? "text-emerald-400"
+                  : timeframeDelta < 0
+                  ? "text-cyan-400"
+                  : "text-zinc-300"
+              }`}
+            >
+              {timeframeDelta > 0 ? `+${timeframeDelta} lbs (Lean Gain)` : `${timeframeDelta} lbs`}
+            </span>
+          </div>
+        )}
+
         <div className="bg-zinc-900/80 border border-zinc-800/90 rounded-2xl overflow-hidden divide-y divide-zinc-800/60">
-          {history.slice(0, 25).map((row) => (
+          {displayedHistory.map((row) => (
             <div key={row.id} className="flex items-center justify-between px-3.5 py-2.5 text-xs">
               <div>
                 <span className="font-bold text-zinc-200">{row.weight_lbs} lbs</span>
