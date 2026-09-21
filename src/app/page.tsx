@@ -331,6 +331,7 @@ export default function MobileGymApp() {
     setIsSaving(true);
     const payload = {
       workout_id: workout.id,
+      title: workout.title,
       status: "completed" as const,
       notes: workout.notes,
       exercises: workout.exercises.map((ex) => ({

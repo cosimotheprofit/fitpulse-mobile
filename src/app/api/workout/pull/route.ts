@@ -26,52 +26,52 @@ export async function GET(req: NextRequest) {
     const workoutIdParam = searchParams.get("workout_id");
     const dateParam = searchParams.get("date");
 
-    let workoutRow;
+    let sessionRow;
     if (workoutIdParam) {
       const res = await db.execute({
-        sql: `SELECT * FROM workouts WHERE id = ? LIMIT 1`,
+        sql: `SELECT * FROM workout_sessions WHERE id = ? LIMIT 1`,
         args: [Number(workoutIdParam)],
       });
-      workoutRow = res.rows[0];
+      sessionRow = res.rows[0];
     } else if (dateParam) {
       const res = await db.execute({
-        sql: `SELECT * FROM workouts WHERE date = ? ORDER BY id DESC LIMIT 1`,
-        args: [dateParam],
+        sql: `SELECT * FROM workout_sessions WHERE start_time LIKE ? ORDER BY id DESC LIMIT 1`,
+        args: [`${dateParam}%`],
       });
-      workoutRow = res.rows[0];
+      sessionRow = res.rows[0];
     } else {
-      // Default: Most recent completed workout, or latest active
+      // Default: Most recent completed workout session, or latest active
       const res = await db.execute(`
-        SELECT * FROM workouts 
-        ORDER BY CASE status WHEN 'completed' THEN 1 ELSE 2 END, id DESC 
+        SELECT * FROM workout_sessions 
+        ORDER BY CASE WHEN end_time IS NOT NULL THEN 1 ELSE 2 END, id DESC 
         LIMIT 1
       `);
-      workoutRow = res.rows[0];
+      sessionRow = res.rows[0];
     }
 
-    if (!workoutRow) {
-      return NextResponse.json({ workout: null, message: "No workouts found." });
+    if (!sessionRow) {
+      return NextResponse.json({ workout: null, message: "No workout sessions found." });
     }
 
-    const workoutId = Number(workoutRow.id);
-
-    const exercisesRes = await db.execute({
-      sql: `SELECT * FROM workout_exercises WHERE workout_id = ? ORDER BY order_index ASC, id ASC`,
-      args: [workoutId],
-    });
+    const sessionId = Number(sessionRow.id);
 
     const setsRes = await db.execute({
-      sql: `SELECT * FROM workout_sets WHERE workout_id = ? ORDER BY id ASC`,
-      args: [workoutId],
+      sql: `
+        SELECT ws.*, e.name as exercise_name, e.muscle_group, e.category
+        FROM workout_sets ws
+        JOIN exercises e ON ws.exercise_id = e.id
+        WHERE ws.session_id = ?
+        ORDER BY ws.id ASC
+      `,
+      args: [sessionId],
     });
 
-    // Compute volume, sets, and 1RM
     let totalVolume = 0;
     let completedSetsCount = 0;
     const exerciseSummaries: Record<
       string,
       {
-        target: { sets: number; reps?: string; weight?: number };
+        muscle_group: string;
         sets: {
           set_number: number;
           weight: number;
@@ -87,26 +87,11 @@ export async function GET(req: NextRequest) {
       }
     > = {};
 
-    for (const exRow of exercisesRes.rows) {
-      const name = String(exRow.name);
-      exerciseSummaries[name] = {
-        target: {
-          sets: Number(exRow.target_sets),
-          reps: exRow.target_reps ? String(exRow.target_reps) : undefined,
-          weight: Number(exRow.target_weight),
-        },
-        sets: [],
-        total_volume: 0,
-        max_weight: 0,
-        best_estimated_1rm: 0,
-      };
-    }
-
     for (const s of setsRes.rows) {
       const name = String(s.exercise_name);
       if (!exerciseSummaries[name]) {
         exerciseSummaries[name] = {
-          target: { sets: 0, weight: 0 },
+          muscle_group: String(s.muscle_group || "Other"),
           sets: [],
           total_volume: 0,
           max_weight: 0,
@@ -137,24 +122,26 @@ export async function GET(req: NextRequest) {
         set_number: Number(s.set_number),
         weight,
         reps,
-        rpe: s.rpe !== null ? Number(s.rpe) : null,
+        rpe: s.rpe !== null && s.rpe !== undefined ? Number(s.rpe) : null,
         completed,
         volume,
         estimated_1rm: e1rm,
       });
     }
 
+    const dateStr = String(sessionRow.start_time).split(" ")[0];
+
     return NextResponse.json({
       success: true,
       workout: {
-        id: workoutId,
-        title: String(workoutRow.title),
-        date: String(workoutRow.date),
-        status: String(workoutRow.status),
-        notes: workoutRow.notes ? String(workoutRow.notes) : null,
-        created_at: String(workoutRow.created_at),
-        started_at: workoutRow.started_at ? String(workoutRow.started_at) : null,
-        completed_at: workoutRow.completed_at ? String(workoutRow.completed_at) : null,
+        id: sessionId,
+        title: String(sessionRow.name),
+        date: dateStr,
+        status: sessionRow.end_time ? "completed" : "in_progress",
+        notes: sessionRow.notes ? String(sessionRow.notes) : null,
+        created_at: String(sessionRow.created_at || sessionRow.start_time),
+        started_at: String(sessionRow.start_time),
+        completed_at: sessionRow.end_time ? String(sessionRow.end_time) : null,
         summary: {
           total_volume_lbs: totalVolume,
           completed_sets: completedSetsCount,
