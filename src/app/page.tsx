@@ -408,7 +408,12 @@ export default function MobileGymApp() {
     : 0;
   const totalVolume = workout
     ? workout.exercises.reduce(
-        (acc, ex) => acc + ex.sets.reduce((sAcc, s) => sAcc + (s.completed ? s.weight * s.reps : 0), 0),
+        (acc, ex) =>
+          acc +
+          ex.sets.reduce(
+            (sAcc, s) => sAcc + (s.completed ? s.weight * (s.reps > 0 ? s.reps : 10) : 0),
+            0
+          ),
         0
       )
     : 0;

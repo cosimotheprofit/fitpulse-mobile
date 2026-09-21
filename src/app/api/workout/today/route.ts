@@ -105,7 +105,7 @@ const SCHEDULED_ROUTINES: Record<
         muscle_group: "Legs",
         target_sets: 3,
         target_reps: "10-12",
-        default_weight: 145,
+        default_weight: 175,
         notes: "Slow 2s negative, squeeze hamstrings at peak contraction",
         aliases: ["Lying Leg Curl", "Seated Leg Curl"],
       },
@@ -114,7 +114,7 @@ const SCHEDULED_ROUTINES: Record<
         muscle_group: "Legs",
         target_sets: 3,
         target_reps: "10-12",
-        default_weight: 105,
+        default_weight: 145,
         notes: "Constant quad tension, pause 1s at top",
       },
       {
@@ -165,7 +165,7 @@ const SCHEDULED_ROUTINES: Record<
         muscle_group: "Legs",
         target_sets: 4,
         target_reps: "10-12",
-        default_weight: 145,
+        default_weight: 175,
         notes: "Slow 2s negative, squeeze hamstrings at peak contraction",
         aliases: ["Lying Leg Curl", "Seated Leg Curl"],
       },
@@ -174,7 +174,7 @@ const SCHEDULED_ROUTINES: Record<
         muscle_group: "Legs",
         target_sets: 4,
         target_reps: "10-12",
-        default_weight: 105,
+        default_weight: 145,
         notes: "Constant quad tension, pause 1s at top",
       },
       {
@@ -182,7 +182,7 @@ const SCHEDULED_ROUTINES: Record<
         muscle_group: "Legs",
         target_sets: 3,
         target_reps: "10-12",
-        default_weight: 350,
+        default_weight: 405,
         notes: "High foot placement, controlled pump volume",
         aliases: ["Horizontal Leg Press", "Cybex Leg Press"],
       },
@@ -225,8 +225,8 @@ export async function GET(req: NextRequest) {
     // 2. If no active session, check for a completed session specifically from today
     if (!sessionRow) {
       const todaySessionRes = await db.execute({
-        sql: `SELECT * FROM workout_sessions WHERE start_time LIKE ? AND end_time IS NOT NULL ORDER BY id DESC LIMIT 1`,
-        args: [`${todayStr}%`],
+        sql: `SELECT * FROM workout_sessions WHERE (start_time LIKE ? OR end_time LIKE ?) AND end_time IS NOT NULL ORDER BY id DESC LIMIT 1`,
+        args: [`${todayStr}%`, `${todayStr}%`],
       });
       sessionRow = todaySessionRes.rows[0];
     }
