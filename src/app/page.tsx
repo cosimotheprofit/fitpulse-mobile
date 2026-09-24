@@ -153,12 +153,18 @@ export default function MobileGymApp() {
       const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
       // 1. Check local storage cache first
+      let hasActiveLocalWorkout = false;
       const cached = localStorage.getItem("fitpulse_active_workout");
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
-          if (parsed && parsed.status !== "completed" && parsed.date === today) {
+          if (parsed && parsed.date === today && parsed.status === "in_progress") {
             setWorkout(parsed);
+            hasActiveLocalWorkout = true;
+          } else if (parsed && parsed.date === today && parsed.status === "completed") {
+            setWorkout(parsed);
+            setLoading(false);
+            return;
           }
         } catch {
           // ignore corrupted cache
@@ -170,9 +176,13 @@ export default function MobileGymApp() {
       if (res.ok) {
         const data = await res.json();
         if (data.workout) {
+          // Do not overwrite an in-progress local workout with a fresh queued template
+          if (hasActiveLocalWorkout && data.workout.status === "queued") {
+            return;
+          }
           setWorkout(data.workout);
           localStorage.setItem("fitpulse_active_workout", JSON.stringify(data.workout));
-        } else {
+        } else if (!hasActiveLocalWorkout) {
           // No active or scheduled workout for today (e.g. rest day)
           setWorkout(null);
           localStorage.removeItem("fitpulse_active_workout");
@@ -341,7 +351,7 @@ export default function MobileGymApp() {
           weight: s.weight,
           reps: s.reps,
           rpe: s.rpe || null,
-          completed: s.completed,
+          completed: s.completed || (Number(s.reps) > 0),
         })),
       })),
     };
