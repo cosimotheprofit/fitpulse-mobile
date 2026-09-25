@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Utensils, Droplets, ChevronLeft, ChevronRight } from "lucide-react";
+import { Utensils, Droplets, ChevronLeft, ChevronRight, Plus, Plane, Trash2, X } from "lucide-react";
 
 interface NutritionTotals {
   calories: number;
@@ -37,6 +37,108 @@ export default function NutritionTab() {
   const [goals, setGoals] = useState<NutritionGoals | null>(null);
   const [meals, setMeals] = useState<Record<string, MealItem[]>>({});
   const [loading, setLoading] = useState(true);
+
+  // Quick / Trip Meal modal state
+  const [showTripModal, setShowTripModal] = useState(false);
+  const [tripMealType, setTripMealType] = useState<string>("Lunch");
+  const [tripFoodName, setTripFoodName] = useState("");
+  const [tripCalories, setTripCalories] = useState<number | "">("");
+  const [tripProtein, setTripProtein] = useState<number | "">("");
+  const [tripCarbs, setTripCarbs] = useState<number | "">("");
+  const [tripFat, setTripFat] = useState<number | "">("");
+  const [tripSodium, setTripSodium] = useState<number | "">("");
+  const [submittingMeal, setSubmittingMeal] = useState(false);
+
+  const applyPreset = (preset: "light" | "moderate" | "hearty" | "feast") => {
+    switch (preset) {
+      case "light":
+        setTripCalories(350);
+        setTripProtein(15);
+        setTripCarbs(35);
+        setTripFat(12);
+        setTripSodium(350);
+        break;
+      case "moderate":
+        setTripCalories(650);
+        setTripProtein(35);
+        setTripCarbs(65);
+        setTripFat(22);
+        setTripSodium(700);
+        break;
+      case "hearty":
+        setTripCalories(950);
+        setTripProtein(48);
+        setTripCarbs(95);
+        setTripFat(38);
+        setTripSodium(1100);
+        break;
+      case "feast":
+        setTripCalories(1400);
+        setTripProtein(60);
+        setTripCarbs(140);
+        setTripFat(65);
+        setTripSodium(1800);
+        break;
+    }
+  };
+
+  const handleOpenTripModal = (type: string = "Lunch") => {
+    setTripMealType(type);
+    setTripFoodName("");
+    setTripCalories("");
+    setTripProtein("");
+    setTripCarbs("");
+    setTripFat("");
+    setTripSodium("");
+    setShowTripModal(true);
+  };
+
+  const submitTripMeal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tripCalories && !tripFoodName) return;
+    setSubmittingMeal(true);
+    try {
+      const res = await fetch("/api/nutrition", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add_meal",
+          date: selectedDate,
+          meal_type: tripMealType,
+          food_name: tripFoodName.trim() || `${tripMealType} (Estimated)`,
+          calories: Number(tripCalories || 0),
+          protein_g: Number(tripProtein || 0),
+          carbs_g: Number(tripCarbs || 0),
+          fat_g: Number(tripFat || 0),
+          sodium_mg: Number(tripSodium || 0),
+        }),
+      });
+      if (res.ok) {
+        setShowTripModal(false);
+        fetchNutrition(selectedDate);
+      }
+    } catch (err) {
+      console.error("Failed to log trip meal:", err);
+    } finally {
+      setSubmittingMeal(false);
+    }
+  };
+
+  const deleteMealItem = async (id: number) => {
+    if (!confirm("Delete this food entry?")) return;
+    try {
+      const res = await fetch("/api/nutrition", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete_meal", id }),
+      });
+      if (res.ok) {
+        fetchNutrition(selectedDate);
+      }
+    } catch (err) {
+      console.error("Failed to delete meal:", err);
+    }
+  };
 
   const fetchNutrition = useCallback(async (dateStr: string) => {
     setLoading(true);
@@ -111,6 +213,15 @@ export default function NutritionTab() {
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Quick / Trip Meal Button */}
+      <button
+        onClick={() => handleOpenTripModal("Lunch")}
+        className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-zinc-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 active:scale-[0.98] transition-all"
+      >
+        <Plane className="w-4 h-4" />
+        <span>+ Quick / Trip Meal</span>
+      </button>
 
       {loading ? (
         <div className="py-12 text-center text-zinc-500 text-xs">Loading nutrition data...</div>
@@ -207,13 +318,14 @@ export default function NutritionTab() {
 
           {/* Meals Breakdown */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-              <Utensils className="w-3.5 h-3.5" /> Meals Logged
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                <Utensils className="w-3.5 h-3.5" /> Meals Logged
+              </h3>
+            </div>
 
             {["Breakfast", "Lunch", "Dinner", "Snack"].map((mealType) => {
               const items = meals[mealType] || [];
-              if (items.length === 0) return null;
 
               const mealCals = items.reduce((acc, it) => acc + (it.calories || 0), 0);
               const mealProtein = items.reduce((acc, it) => acc + (it.protein_g || 0), 0);
@@ -221,28 +333,219 @@ export default function NutritionTab() {
               return (
                 <div key={mealType} className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-3">
                   <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-zinc-800/50">
-                    <h4 className="text-xs font-extrabold text-zinc-200">{mealType}</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-extrabold text-zinc-200">{mealType}</h4>
+                      <button
+                        onClick={() => handleOpenTripModal(mealType)}
+                        className="text-[10px] text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20"
+                      >
+                        <Plus className="w-2.5 h-2.5" /> Log
+                      </button>
+                    </div>
                     <span className="text-[11px] font-bold text-zinc-400">
                       {Math.round(mealCals)} kcal • {Math.round(mealProtein)}g P
                     </span>
                   </div>
 
-                  <div className="space-y-1.5">
-                    {items.map((item, idx) => (
-                      <div key={idx} className="flex items-center justify-between text-xs py-1">
-                        <span className="text-zinc-300 truncate max-w-[200px]">{item.food_name}</span>
-                        <span className="font-mono text-zinc-400 text-[11px] shrink-0">
-                          {Math.round(item.calories)} kcal
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  {items.length === 0 ? (
+                    <p className="text-[11px] text-zinc-500 italic py-1">No items logged</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {items.map((item) => (
+                        <div key={item.id} className="flex items-center justify-between text-xs py-1 group">
+                          <div className="flex items-center gap-2 truncate max-w-[200px]">
+                            <button
+                              onClick={() => deleteMealItem(item.id)}
+                              className="text-zinc-600 hover:text-rose-400 transition"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                            <span className="text-zinc-300 truncate">{item.food_name}</span>
+                          </div>
+                          <span className="font-mono text-zinc-400 text-[11px] shrink-0">
+                            {Math.round(item.calories)} kcal
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
         </>
       ) : null}
+
+      {/* Quick / Trip Meal Modal */}
+      {showTripModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <Plane className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-zinc-100">Trip / Quick Meal</h3>
+                  <p className="text-[10px] text-zinc-400">One-thumb estimate for dining out</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowTripModal(false)}
+                className="text-zinc-400 hover:text-zinc-200 p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={submitTripMeal} className="space-y-3.5">
+              {/* Meal Type Pills */}
+              <div>
+                <label className="block text-[11px] font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Meal Type</label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {["Breakfast", "Lunch", "Dinner", "Snack"].map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setTripMealType(type)}
+                      className={`py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        tripMealType === type
+                          ? "bg-emerald-500 text-zinc-950 font-black shadow-md shadow-emerald-500/20"
+                          : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Food Name / Description */}
+              <div>
+                <label className="block text-[11px] font-bold text-zinc-400 mb-1 uppercase tracking-wider">What did you eat?</label>
+                <input
+                  type="text"
+                  value={tripFoodName}
+                  onChange={(e) => setTripFoodName(e.target.value)}
+                  placeholder="e.g. Airport sandwich, Tacos, Steak..."
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              {/* Quick Size Presets */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Quick Size Presets</label>
+                  <span className="text-[9px] text-emerald-400 font-medium">Auto-fills</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => applyPreset("light")}
+                    className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-emerald-500/50 text-left transition"
+                  >
+                    <div className="font-bold text-zinc-200">☕ Light</div>
+                    <div className="text-[10px] text-zinc-500">~350 kcal • 15g P</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPreset("moderate")}
+                    className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-emerald-500/50 text-left transition"
+                  >
+                    <div className="font-bold text-zinc-200">🥪 Normal</div>
+                    <div className="text-[10px] text-zinc-500">~650 kcal • 35g P</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPreset("hearty")}
+                    className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-emerald-500/50 text-left transition"
+                  >
+                    <div className="font-bold text-zinc-200">🍽️ Hearty</div>
+                    <div className="text-[10px] text-zinc-500">~950 kcal • 48g P</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPreset("feast")}
+                    className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-emerald-500/50 text-left transition"
+                  >
+                    <div className="font-bold text-zinc-200">🍕 Feast</div>
+                    <div className="text-[10px] text-zinc-500">~1400 kcal • 60g P</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Main Inputs: Calories & Protein */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-zinc-950 border border-amber-500/40 rounded-xl p-2.5 text-center">
+                  <label className="block text-[10px] font-bold text-amber-400 mb-1 uppercase">Calories *</label>
+                  <input
+                    type="number"
+                    value={tripCalories}
+                    onChange={(e) => setTripCalories(e.target.value === "" ? "" : Number(e.target.value))}
+                    placeholder="650"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1 text-center text-base font-black text-amber-300 focus:outline-none focus:border-amber-400"
+                    required
+                  />
+                </div>
+                <div className="bg-zinc-950 border border-sky-500/40 rounded-xl p-2.5 text-center">
+                  <label className="block text-[10px] font-bold text-sky-400 mb-1 uppercase">Protein (g) *</label>
+                  <input
+                    type="number"
+                    value={tripProtein}
+                    onChange={(e) => setTripProtein(e.target.value === "" ? "" : Number(e.target.value))}
+                    placeholder="35"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1 text-center text-base font-black text-sky-300 focus:outline-none focus:border-sky-400"
+                  />
+                </div>
+              </div>
+
+              {/* Secondary Macros: Carbs & Fat */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label className="block text-[9px] font-bold text-zinc-400 mb-1 text-center uppercase">Carbs (g)</label>
+                  <input
+                    type="number"
+                    value={tripCarbs}
+                    onChange={(e) => setTripCarbs(e.target.value === "" ? "" : Number(e.target.value))}
+                    placeholder="65"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-1 text-center text-zinc-100 text-xs focus:outline-none focus:border-zinc-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold text-zinc-400 mb-1 text-center uppercase">Fat (g)</label>
+                  <input
+                    type="number"
+                    value={tripFat}
+                    onChange={(e) => setTripFat(e.target.value === "" ? "" : Number(e.target.value))}
+                    placeholder="22"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-1 text-center text-zinc-100 text-xs focus:outline-none focus:border-zinc-600"
+                  />
+                </div>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex gap-2 pt-2 border-t border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setShowTripModal(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingMeal}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-zinc-950 text-xs font-black shadow-lg shadow-emerald-500/20 disabled:opacity-50 transition"
+                >
+                  {submittingMeal ? "Saving..." : "Save Meal"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -131,6 +131,50 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, message: `Added ${amount}ml water` });
     }
 
+    if (body.action === "add_meal" || body.action === "quick_meal") {
+      const date = body.date || new Date().toISOString().split("T")[0];
+      const mealType = body.meal_type || "Lunch";
+      const foodName = (body.food_name || "Quick Meal").trim();
+      const cals = Math.round(Number(body.calories || 0) * 10) / 10;
+      const protein = Math.round(Number(body.protein_g || 0) * 10) / 10;
+      const carbs = Math.round(Number(body.carbs_g || 0) * 10) / 10;
+      const fat = Math.round(Number(body.fat_g || 0) * 10) / 10;
+      const fiber = Math.round(Number(body.fiber_g || 0) * 10) / 10;
+      const sodium = Math.round(Number(body.sodium_mg || 0) * 10) / 10;
+
+      await db.execute({
+        sql: `INSERT INTO nutrition_logs (
+          date, meal_type, food_name, serving_size, servings,
+          calories, protein_g, carbs_g, fat_g, fiber_g, sodium_mg
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        args: [
+          date,
+          mealType,
+          foodName,
+          "1 serving",
+          1.0,
+          cals,
+          protein,
+          carbs,
+          fat,
+          fiber,
+          sodium
+        ],
+      });
+
+      return NextResponse.json({ success: true, message: `Logged ${foodName}` });
+    }
+
+    if (body.action === "delete_meal") {
+      const id = Number(body.id);
+      if (!id) return NextResponse.json({ error: "Missing meal item ID" }, { status: 400 });
+      await db.execute({
+        sql: `DELETE FROM nutrition_logs WHERE id = ?`,
+        args: [id],
+      });
+      return NextResponse.json({ success: true, message: "Deleted meal item" });
+    }
+
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (err: unknown) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
