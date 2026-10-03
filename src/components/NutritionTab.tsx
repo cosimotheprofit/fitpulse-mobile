@@ -223,6 +223,19 @@ export default function NutritionTab() {
         <span>+ Quick / Trip Meal</span>
       </button>
 
+      {/* Vacation / Rough Estimates Warning Banner */}
+      {(selectedDate >= "2026-09-25" && selectedDate <= "2026-09-29") && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3 flex items-start gap-2.5 text-xs text-amber-300 shadow-sm">
+          <span className="text-base leading-none">🌴</span>
+          <div>
+            <span className="font-bold block text-amber-200">Vacation / Travel Day — Rough Estimates</span>
+            <span className="text-[11px] text-amber-400/80 leading-relaxed block mt-0.5">
+              Meals logged on this date were quick approximations without exact measurements. Actual calorie intake was likely higher due to restaurant oils & unmeasured portions (explaining weight gain).
+            </span>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="py-12 text-center text-zinc-500 text-xs">Loading nutrition data...</div>
       ) : totals && goals ? (

@@ -16,6 +16,7 @@ export default function BodyTab() {
   const [history, setHistory] = useState<BodyRecord[]>([]);
   const [latest, setLatest] = useState<BodyRecord | null>(null);
   const [targetWeight, setTargetWeight] = useState<number>(177);
+  const [targetSurplus, setTargetSurplus] = useState<number>(275);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState<number>(14); // 2-week (14-day) view default
 
@@ -34,6 +35,7 @@ export default function BodyTab() {
         setHistory(data.history || []);
         setLatest(data.latest);
         if (data.target_weight_lbs) setTargetWeight(data.target_weight_lbs);
+        if (data.target_surplus_kcal) setTargetSurplus(data.target_surplus_kcal);
       }
     } catch (err) {
       console.error("Failed to load body metrics:", err);
@@ -116,6 +118,9 @@ export default function BodyTab() {
           <p className="text-[10px] font-semibold text-zinc-400 mt-0.5">
             {diffToGoal > 0 ? `+${diffToGoal} lbs over` : `${Math.abs(diffToGoal)} lbs under`}
           </p>
+          <p className="text-[9px] font-medium text-cyan-400 mt-0.5">
+            Surplus: +{targetSurplus} kcal/d
+          </p>
         </div>
       </div>
 
@@ -189,20 +194,38 @@ export default function BodyTab() {
         )}
 
         <div className="bg-zinc-900/80 border border-zinc-800/90 rounded-2xl overflow-hidden divide-y divide-zinc-800/60">
-          {displayedHistory.map((row) => (
-            <div key={row.id} className="flex items-center justify-between px-3.5 py-2.5 text-xs">
-              <div>
-                <span className="font-bold text-zinc-200">{row.weight_lbs} lbs</span>
-                {row.body_fat_pct && (
-                  <span className="text-[10px] text-zinc-500 ml-2">({row.body_fat_pct}% BF)</span>
-                )}
+          {displayedHistory.map((row) => {
+            const isVacation = (row.date >= "2026-09-25" && row.date <= "2026-09-29") || (row.notes && row.notes.toLowerCase().includes("vacation"));
+            return (
+              <div
+                key={row.id}
+                className={`flex items-center justify-between px-3.5 py-2.5 text-xs ${
+                  isVacation ? "bg-amber-500/[0.08] border-l-2 border-amber-500" : ""
+                }`}
+              >
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-zinc-200">{row.weight_lbs} lbs</span>
+                    {isVacation && (
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        🌴 Vacation
+                      </span>
+                    )}
+                  </div>
+                  {row.body_fat_pct && (
+                    <span className="text-[10px] text-zinc-500">({row.body_fat_pct}% BF)</span>
+                  )}
+                  {row.notes && (
+                    <p className="text-[10px] text-amber-400/80 italic mt-0.5">{row.notes}</p>
+                  )}
+                </div>
+                <div className="text-right">
+                  <span className="text-zinc-400 font-mono text-[11px] block">{row.date}</span>
+                  <span className="text-[9px] text-emerald-400/80">Avg: {row.moving_avg_7d} lbs</span>
+                </div>
               </div>
-              <div className="text-right">
-                <span className="text-zinc-400 font-mono text-[11px] block">{row.date}</span>
-                <span className="text-[9px] text-emerald-400/80">Avg: {row.moving_avg_7d} lbs</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

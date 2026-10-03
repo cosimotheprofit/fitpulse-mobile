@@ -40,6 +40,11 @@ export async function POST(req: NextRequest) {
         sql: `UPDATE workout_sessions SET end_time = ?, notes = COALESCE(?, notes) WHERE id = ?`,
         args: [nowIso, body.notes || null, sessionId],
       });
+      // Clear out all prior sets for this session so removed or skipped exercises do not linger
+      await db.execute({
+        sql: `DELETE FROM workout_sets WHERE session_id = ?`,
+        args: [sessionId],
+      });
     }
 
     // Process exercises and sets
@@ -62,13 +67,19 @@ export async function POST(req: NextRequest) {
           exerciseId = Number(exIdRes.rows[0].id);
         }
 
-        // Clean out existing sets for this session & exercise and re-insert logged sets
-        await db.execute({
-          sql: `DELETE FROM workout_sets WHERE session_id = ? AND exercise_id = ?`,
-          args: [sessionId, exerciseId],
-        });
+        if (!isFinishing) {
+          // If in progress, clean out existing sets for this session & exercise
+          await db.execute({
+            sql: `DELETE FROM workout_sets WHERE session_id = ? AND exercise_id = ?`,
+            args: [sessionId, exerciseId],
+          });
+        }
 
         for (const s of ex.sets) {
+          // Only save and count sets that were actually checked/completed
+          const isSetCompleted = Boolean(s.completed);
+          if (!isSetCompleted && isFinishing) continue;
+
           await db.execute({
             sql: `
               INSERT INTO workout_sets (session_id, exercise_id, set_number, set_type, weight, reps, rpe, completed)
@@ -81,7 +92,7 @@ export async function POST(req: NextRequest) {
               s.weight,
               s.reps,
               s.rpe !== undefined ? s.rpe : null,
-              s.completed ? 1 : 0,
+              isSetCompleted ? 1 : 0,
             ],
           });
         }

@@ -17,6 +17,7 @@ import {
   Sparkles,
   Lock,
   Delete,
+  Trash2,
   Calendar,
   Utensils,
   Scale,
@@ -161,10 +162,9 @@ export default function MobileGymApp() {
           if (parsed && parsed.date === today && parsed.status === "in_progress") {
             setWorkout(parsed);
             hasActiveLocalWorkout = true;
-          } else if (parsed && parsed.date === today && parsed.status === "completed") {
+          } else if (parsed && parsed.status === "completed") {
+            // Keep local completed workout temporarily, but still query server for today's active or scheduled session
             setWorkout(parsed);
-            setLoading(false);
-            return;
           }
         } catch {
           // ignore corrupted cache
@@ -176,14 +176,12 @@ export default function MobileGymApp() {
       if (res.ok) {
         const data = await res.json();
         if (data.workout) {
-          // Do not overwrite an in-progress local workout with a fresh queued template
-          if (hasActiveLocalWorkout && data.workout.status === "queued") {
-            return;
+          // If server has an active in-progress workout, or if user is on completed screen, or has no active local workout
+          if (!hasActiveLocalWorkout || data.workout.status === "in_progress") {
+            setWorkout(data.workout);
+            localStorage.setItem("fitpulse_active_workout", JSON.stringify(data.workout));
           }
-          setWorkout(data.workout);
-          localStorage.setItem("fitpulse_active_workout", JSON.stringify(data.workout));
         } else if (!hasActiveLocalWorkout) {
-          // No active or scheduled workout for today (e.g. rest day)
           setWorkout(null);
           localStorage.removeItem("fitpulse_active_workout");
         }
@@ -310,6 +308,30 @@ export default function MobileGymApp() {
     localStorage.setItem("fitpulse_active_workout", JSON.stringify(updated));
   };
 
+  const handleDeleteExercise = (exerciseName: string) => {
+    if (!workout) return;
+    if (!window.confirm(`Delete "${exerciseName}" from this workout?`)) return;
+    const newExercises = workout.exercises.filter((ex) => ex.name !== exerciseName);
+    const updated = { ...workout, exercises: newExercises };
+    setWorkout(updated);
+    localStorage.setItem("fitpulse_active_workout", JSON.stringify(updated));
+  };
+
+  const removeSetFromExercise = (exerciseName: string, setIndex: number) => {
+    if (!workout) return;
+    const newExercises = workout.exercises.map((ex) => {
+      if (ex.name !== exerciseName) return ex;
+      const filteredSets = ex.sets.filter((_, idx) => idx !== setIndex).map((s, idx) => ({
+        ...s,
+        set_number: idx + 1,
+      }));
+      return { ...ex, sets: filteredSets };
+    });
+    const updated = { ...workout, exercises: newExercises };
+    setWorkout(updated);
+    localStorage.setItem("fitpulse_active_workout", JSON.stringify(updated));
+  };
+
   const handleAddNewExercise = () => {
     if (!newExName.trim() || !workout) return;
     const sets: WorkoutSetData[] = Array.from({ length: newExSets }, (_, i) => ({
@@ -338,22 +360,35 @@ export default function MobileGymApp() {
   // Finish and save workout
   const handleFinishWorkout = async () => {
     if (!workout) return;
+
+    // Only include exercises that have at least one completed (checked) set!
+    const completedExercises = workout.exercises
+      .map((ex) => ({
+        name: ex.name,
+        sets: ex.sets
+          .filter((s) => Boolean(s.completed))
+          .map((s, idx) => ({
+            set_number: idx + 1,
+            weight: Number(s.weight) || 0,
+            reps: Number(s.reps) || 0,
+            rpe: s.rpe || null,
+            completed: true,
+          })),
+      }))
+      .filter((ex) => ex.sets.length > 0);
+
+    if (completedExercises.length === 0) {
+      alert("No sets were checked as completed. Please check off at least one completed set before finishing!");
+      return;
+    }
+
     setIsSaving(true);
     const payload = {
       workout_id: workout.id,
       title: workout.title,
       status: "completed" as const,
       notes: workout.notes,
-      exercises: workout.exercises.map((ex) => ({
-        name: ex.name,
-        sets: ex.sets.map((s) => ({
-          set_number: s.set_number,
-          weight: s.weight,
-          reps: s.reps,
-          rpe: s.rpe || null,
-          completed: s.completed || (Number(s.reps) > 0),
-        })),
-      })),
+      exercises: completedExercises,
     };
 
     try {
@@ -559,14 +594,20 @@ export default function MobileGymApp() {
             </div>
             <h2 className="text-lg font-bold text-zinc-100 mb-1">Rest &amp; Hypertrophy Rebuild</h2>
             <p className="text-xs text-zinc-400 max-w-xs mb-6 leading-relaxed">
-              Muscles rebuild during rest when fueled by your 2,875 kcal surplus and 180g protein. Start your next routine whenever you&apos;re ready:
+              Muscles rebuild during rest when fueled by your 2,823 kcal (+275 kcal surplus) and 180g protein. Start your next routine whenever you&apos;re ready:
             </p>
             <div className="flex flex-col gap-2.5 w-full max-w-xs">
               <button
-                onClick={() => handleLoadRoutine("A_UPPER")}
-                className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-zinc-950 font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 transition-all text-xs"
+                onClick={() => handleLoadRoutine("LEGS_SAT")}
+                className="w-full py-3 px-4 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-zinc-950 font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-amber-950/40 transition-all text-xs"
               >
-                <Play className="w-4 h-4 fill-zinc-950" /> Start Monday: Upper Mass A (Bench, Rows &amp; Arms)
+                <Play className="w-4 h-4 fill-zinc-950" /> Start Today: Leg Day (Hack Squats &amp; RDLs)
+              </button>
+              <button
+                onClick={() => handleLoadRoutine("A_UPPER")}
+                className="w-full py-2.5 px-4 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold rounded-xl border border-emerald-500/30 text-xs transition-all flex items-center justify-center gap-2"
+              >
+                <Play className="w-3.5 h-3.5 fill-emerald-400" /> Start Workout A (Bench, Rows &amp; Arms)
               </button>
               <button
                 onClick={() => handleLoadRoutine("B")}
@@ -615,18 +656,32 @@ export default function MobileGymApp() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-2 w-full max-w-xs">
+            <div className="flex flex-col gap-2.5 w-full max-w-xs">
               <button
-                onClick={() => handleLoadRoutine("A_UPPER")}
-                className="w-full py-2.5 px-4 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold rounded-xl border border-emerald-500/30 text-xs transition-all flex items-center justify-center gap-1.5"
+                onClick={() => handleLoadRoutine("LEGS_SAT")}
+                className="w-full py-3 px-4 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-zinc-950 font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-amber-950/40 transition-all text-xs"
               >
-                <Play className="w-3.5 h-3.5 fill-emerald-300" /> Start Next: Upper Mass A (Legs Rested)
+                <Play className="w-4 h-4 fill-zinc-950" /> Start Today: Leg Day (Hack Squats &amp; RDLs)
               </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleLoadRoutine("A_UPPER")}
+                  className="py-2 px-3 bg-zinc-900 hover:bg-zinc-800 text-emerald-400 font-semibold rounded-xl border border-emerald-500/20 text-[11px] transition-all flex items-center justify-center gap-1.5"
+                >
+                  <Play className="w-3 h-3 fill-emerald-400" /> Workout A
+                </button>
+                <button
+                  onClick={() => handleLoadRoutine("B")}
+                  className="py-2 px-3 bg-zinc-900 hover:bg-zinc-800 text-cyan-400 font-semibold rounded-xl border border-cyan-500/20 text-[11px] transition-all flex items-center justify-center gap-1.5"
+                >
+                  <Play className="w-3 h-3 fill-cyan-400" /> Workout B
+                </button>
+              </div>
               <button
                 onClick={() => {
                   setWorkout({ ...workout, status: "in_progress" });
                 }}
-                className="py-2 px-4 bg-zinc-800 text-zinc-400 rounded-xl text-xs hover:bg-zinc-700 transition-all"
+                className="py-2 px-4 bg-zinc-850 hover:bg-zinc-800 text-zinc-400 rounded-xl text-xs transition-all border border-zinc-800"
               >
                 Edit Completed Workout
               </button>
@@ -662,6 +717,29 @@ export default function MobileGymApp() {
                   className="bg-emerald-500 h-full transition-all duration-300 rounded-full"
                   style={{ width: `${totalPlannedSets > 0 ? (totalCompletedSets / totalPlannedSets) * 100 : 0}%` }}
                 />
+              </div>
+
+              {/* Routine Quick Switch Bar */}
+              <div className="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-zinc-800/80">
+                <span className="text-[10px] uppercase font-bold text-zinc-400 mr-1">Switch:</span>
+                <button
+                  onClick={() => handleLoadRoutine("LEGS_SAT")}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${workout.title.includes("Leg") ? "bg-amber-500 text-zinc-950 shadow-sm" : "bg-zinc-800/90 text-amber-300 hover:bg-zinc-750 border border-amber-500/30"}`}
+                >
+                  🦵 Leg Day
+                </button>
+                <button
+                  onClick={() => handleLoadRoutine("A_UPPER")}
+                  className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all ${workout.title.includes("Workout A") || workout.title.includes("Full Body A") ? "bg-emerald-500 text-zinc-950 shadow-sm" : "bg-zinc-800/90 text-emerald-400 hover:bg-zinc-750 border border-emerald-500/30"}`}
+                >
+                  Workout A
+                </button>
+                <button
+                  onClick={() => handleLoadRoutine("B")}
+                  className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all ${workout.title.includes("Workout B") || workout.title.includes("Full Body B") ? "bg-cyan-500 text-zinc-950 shadow-sm" : "bg-zinc-800/90 text-cyan-400 hover:bg-zinc-750 border border-cyan-500/30"}`}
+                >
+                  Workout B
+                </button>
               </div>
             </div>
 
@@ -734,6 +812,17 @@ export default function MobileGymApp() {
                         <span className="text-xs font-semibold text-zinc-400">
                           {completedSets}/{exercise.sets.length}
                         </span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteExercise(exercise.name);
+                          }}
+                          className="p-1 text-zinc-500 hover:text-red-400 hover:bg-zinc-800 rounded-lg transition-colors"
+                          title={`Delete ${exercise.name} from workout`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                         {isCollapsed ? (
                           <ChevronDown className="w-4 h-4 text-zinc-400" />
                         ) : (
@@ -827,9 +916,22 @@ export default function MobileGymApp() {
                                   ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-950"
                                   : "bg-zinc-800 hover:bg-zinc-700 text-zinc-400"
                               }`}
+                              title={set.completed ? "Mark uncompleted" : "Mark completed"}
                             >
                               <Check className={`w-5 h-5 ${set.completed ? "stroke-[3]" : ""}`} />
                             </button>
+
+                            {/* Delete Set Button */}
+                            {exercise.sets.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeSetFromExercise(exercise.name, setIdx)}
+                                className="w-7 h-10 rounded-lg flex items-center justify-center text-zinc-600 hover:text-red-400 hover:bg-zinc-800/60 transition-colors"
+                                title="Delete set"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                           </div>
                         ))}
 

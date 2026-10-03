@@ -15,11 +15,16 @@ export async function GET() {
       ORDER BY date ASC
     `);
 
-    // Fetch target weight
-    const targetRes = await db.execute(`
-      SELECT value FROM user_settings WHERE key = 'target_weight_lbs' LIMIT 1
+    // Fetch target weight & surplus
+    const settingsRes = await db.execute(`
+      SELECT key, value FROM user_settings WHERE key IN ('target_weight_lbs', 'daily_surplus_target')
     `);
-    const targetWeight = targetRes.rows[0] ? parseFloat(String(targetRes.rows[0].value)) : 177.0;
+    let targetWeight = 177.0;
+    let targetSurplus = 275.0;
+    for (const r of settingsRes.rows) {
+      if (r.key === 'target_weight_lbs') targetWeight = parseFloat(String(r.value));
+      if (r.key === 'daily_surplus_target') targetSurplus = parseFloat(String(r.value));
+    }
 
     // Calculate 7-day rolling moving average
     const records = metricsRes.rows.map((row, index) => {
@@ -46,6 +51,7 @@ export async function GET() {
 
     return NextResponse.json({
       target_weight_lbs: targetWeight,
+      target_surplus_kcal: targetSurplus,
       latest,
       history: reversed.slice(0, 50), // Last 50 entries
       total_count: records.length,

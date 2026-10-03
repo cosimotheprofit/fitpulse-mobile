@@ -22,16 +22,18 @@ export async function GET(req: NextRequest) {
     // Fetch user settings / goals
     const settingsRes = await db.execute(`SELECT key, value FROM user_settings`);
     const goals: Record<string, number> = {
-      calorie_target: 2875,
+      calorie_target: 2823,
+      surplus_target: 275,
       protein_target: 180,
-      carbs_target: 380,
-      fat_target: 70,
+      carbs_target: 323,
+      fat_target: 90,
       water_target_ml: 3000,
     };
     for (const row of settingsRes.rows) {
       const k = String(row.key);
       const v = parseFloat(String(row.value));
       if (k === "daily_calorie_target") goals.calorie_target = v;
+      if (k === "daily_surplus_target") goals.surplus_target = v;
       if (k === "daily_protein_target") goals.protein_target = v;
       if (k === "daily_carbs_target") goals.carbs_target = v;
       if (k === "daily_fat_target") goals.fat_target = v;

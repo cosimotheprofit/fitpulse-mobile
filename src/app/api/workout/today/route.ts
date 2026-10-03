@@ -255,6 +255,66 @@ const SCHEDULED_ROUTINES: Record<
       },
     ],
   },
+  LEGS_SAT: {
+    code: "LEGS_SAT",
+    title: "Leg Day (Hack Squats & RDLs)",
+    notes: "Hack Squat PR Overload, Dumbbell RDLs, Leg Press, Leg Curls & Extensions",
+    exercises: [
+      {
+        name: "Hack Squat Machine",
+        muscle_group: "Legs",
+        target_sets: 3,
+        target_reps: "8-10",
+        default_weight: 110,
+        notes: "Back glued to pad, descend below parallel, drive up through mid-foot",
+        aliases: ["Hack Squat"],
+      },
+      {
+        name: "Dumbbell Romanian Deadlift",
+        muscle_group: "Legs",
+        target_sets: 3,
+        target_reps: "8-10",
+        default_weight: 50,
+        notes: "Soft knees, hinge hips back into wall, deep hamstring stretch at mid-shin",
+        aliases: ["Romanian Deadlift", "Dumbbell RDL", "RDL"],
+      },
+      {
+        name: "Leg Press",
+        muscle_group: "Legs",
+        target_sets: 3,
+        target_reps: "10",
+        default_weight: 340,
+        notes: "High/wide foot placement for adductor & glute depth",
+        aliases: ["Horizontal Leg Press"],
+      },
+      {
+        name: "Leg Curl",
+        muscle_group: "Legs",
+        target_sets: 3,
+        target_reps: "8-10",
+        default_weight: 175,
+        notes: "Slow 2s negative, squeeze hamstrings at peak contraction",
+        aliases: ["Lying Leg Curl", "Seated Leg Curl"],
+      },
+      {
+        name: "Leg Extension",
+        muscle_group: "Legs",
+        target_sets: 3,
+        target_reps: "10",
+        default_weight: 165,
+        notes: "Constant quad tension, pause 1s at top",
+      },
+      {
+        name: "Ab machine",
+        muscle_group: "Core",
+        target_sets: 3,
+        target_reps: "12-15",
+        default_weight: 165,
+        notes: "Controlled crunch, deep rib-to-pelvis contraction",
+        aliases: ["Ab Machine"],
+      },
+    ],
+  },
 };
 
 export async function GET(req: NextRequest) {
@@ -388,6 +448,8 @@ export async function GET(req: NextRequest) {
         routineKey = "A_UPPER"; // Monday Sep 21: Upper Body Mass (legs resting after overnight session 30)
       } else if (todayStr === "2026-09-24") {
         routineKey = "LEGS"; // Pre-vacation leg overload
+      } else if (todayStr === "2026-10-03" || dayOfWeek === 6) {
+        routineKey = "LEGS_SAT"; // Saturday Oct 3: Dedicated Leg Overload
       } else if (todayStr >= "2026-09-25" && todayStr <= "2026-09-29") {
         isVacation = true;
       } else if (dayOfWeek === 1 || dayOfWeek === 5) {
