@@ -94,3 +94,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    await initDb();
+    const db = getDb();
+    const { searchParams } = new URL(req.url);
+    const date = searchParams.get("date");
+    if (!date) {
+      return NextResponse.json({ error: "Missing date parameter" }, { status: 400 });
+    }
+
+    await db.execute({
+      sql: `DELETE FROM body_metrics WHERE date = ?`,
+      args: [date],
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `Deleted weigh-in for ${date}`,
+    });
+  } catch (err: unknown) {
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
+}
+
