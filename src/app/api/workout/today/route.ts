@@ -12,6 +12,7 @@ interface RoutineExerciseDef {
   default_weight: number;
   notes?: string;
   aliases?: string[];
+  planned_sets?: { weight: number; reps: number }[];
 }
 
 const SCHEDULED_ROUTINES: Record<
@@ -21,118 +22,192 @@ const SCHEDULED_ROUTINES: Record<
   A: {
     code: "A",
     title: "Full Body A (Bench, Rows & Hack Squats)",
-    notes: "Chest Mass, Back Thickness, Quad Overload & Arm Growth",
+    notes: "Chest Mass, Back Thickness, Quad Overload & Arm Growth — Progressive Overload",
     exercises: [
       {
         name: "Barbell Bench Press",
         muscle_group: "Chest",
         target_sets: 3,
-        target_reps: "5-8",
+        target_reps: "8",
         default_weight: 135,
-        notes: "Heavy strength overload (1 plate) — controlled 3s eccentric, pause on chest, drive with leg drive",
+        notes: "Volume Overload: 135 lbs for 8, 8, 8 reps before jumping to 140 lbs (Friday hit 7, 7, 6)",
+        planned_sets: [
+          { weight: 135, reps: 8 },
+          { weight: 135, reps: 8 },
+          { weight: 135, reps: 8 },
+        ],
       },
       {
         name: "Dumbbell Bent-Over Row",
         muscle_group: "Back",
         target_sets: 3,
-        target_reps: "10",
-        default_weight: 45,
-        notes: "Support on bench or hinge, pull DB to hip with full lat stretch at bottom",
+        target_reps: "8-10",
+        default_weight: 65,
+        notes: "Weight Overload Bump: move up to 65 lbs DBs for 8-10 reps (blew past 10 reps on Friday with 60 lbs x 12)",
         aliases: ["Barbell Bent-Over Row"],
+        planned_sets: [
+          { weight: 65, reps: 10 },
+          { weight: 65, reps: 10 },
+          { weight: 65, reps: 8 },
+        ],
       },
       {
         name: "Hack Squat Machine",
         muscle_group: "Legs",
         target_sets: 3,
         target_reps: "8-10",
-        default_weight: 90,
-        notes: "Deep knee travel over toes, controlled descent, lower back glued to pad",
+        default_weight: 120,
+        notes: "Leg Overload: 120 lbs x 10, 10, 10 (Saturday hit 120 lbs x 10; attempt 125 lbs if legs are fully fresh)",
         aliases: ["Hack Squat"],
+        planned_sets: [
+          { weight: 120, reps: 10 },
+          { weight: 120, reps: 10 },
+          { weight: 120, reps: 10 },
+        ],
       },
       {
         name: "Cable Lateral Raise",
         muscle_group: "Shoulders",
         target_sets: 3,
-        target_reps: "12-15",
-        default_weight: 20,
-        notes: "Scapular plane (30° forward), smooth continuous cable tension",
+        target_reps: "11-12",
+        default_weight: 15,
+        notes: "Rep Overload: stay at 15 lbs, target 11-12 clean reps with 2s eccentric before moving to 20 lbs (Friday hit 10, 9, 10)",
         aliases: ["Dumbbell Lateral Raise", "Cable Lateral Raises"],
+        planned_sets: [
+          { weight: 15, reps: 12 },
+          { weight: 15, reps: 11 },
+          { weight: 15, reps: 11 },
+        ],
       },
       {
         name: "Cable Rear Delt Fly",
         muscle_group: "Shoulders",
         target_sets: 3,
         target_reps: "12-15",
-        default_weight: 20,
-        notes: "Reach wide to sides, squeeze posterior deltoids",
+        default_weight: 15,
+        notes: "Rep Overload: aim for 13-15 reps at 15 lbs (Friday hit 11, 11, 12); test 20 lbs on later sets if 15 is easy",
+        planned_sets: [
+          { weight: 15, reps: 13 },
+          { weight: 15, reps: 13 },
+          { weight: 15, reps: 14 },
+        ],
       },
       {
         name: "Barbell Bicep Curl",
         muscle_group: "Arms",
         target_sets: 3,
-        target_reps: "10-12",
+        target_reps: "8-10",
         default_weight: 35,
-        notes: "Supinate at top, strict eccentric for bicep peak",
+        notes: "Density Overload: target 27+ total reps at 35 lbs (10, 9, 8) to beat Friday's 25 reps with strict form",
         aliases: ["Bicep Curl", "Dumbbell Bicep Curl", "Bicep Curls (DB or Cable)"],
+        planned_sets: [
+          { weight: 35, reps: 10 },
+          { weight: 35, reps: 9 },
+          { weight: 35, reps: 8 },
+        ],
+      },
+      {
+        name: "Skull Crushers",
+        muscle_group: "Arms",
+        target_sets: 3,
+        target_reps: "8-10",
+        default_weight: 60,
+        notes: "Weight Overload Bump: graduated to 60 lbs for 8-10 reps (mastered 55 lbs x 10, 10, 10 on Friday)",
+        aliases: ["Skull Crusher", "Lying Triceps Extension"],
+        planned_sets: [
+          { weight: 60, reps: 10 },
+          { weight: 60, reps: 10 },
+          { weight: 60, reps: 8 },
+        ],
       },
     ],
   },
   A_UPPER: {
     code: "A_UPPER",
     title: "Workout A (Upper Mass · Legs Rested)",
-    notes: "Chest Mass, Back Density, 3D Delts & Arms (Hack Squats swapped for Tricep Rope Pushdowns)",
+    notes: "Chest Mass, Back Density, 3D Delts & Arms — Progressive Overload Targets",
     exercises: [
       {
         name: "Barbell Bench Press",
         muscle_group: "Chest",
         target_sets: 3,
-        target_reps: "6-10",
+        target_reps: "8",
         default_weight: 135,
-        notes: "Controlled 3s eccentric, touch mid-chest, drive up with leg drive",
+        notes: "Volume Overload: 135 lbs for 8, 8, 8 reps (Friday hit 7, 7, 6) before moving to 140 lbs",
+        planned_sets: [
+          { weight: 135, reps: 8 },
+          { weight: 135, reps: 8 },
+          { weight: 135, reps: 8 },
+        ],
       },
       {
         name: "Dumbbell Bent-Over Row",
         muscle_group: "Back",
         target_sets: 3,
-        target_reps: "10",
-        default_weight: 45,
-        notes: "Support on bench or hinge, pull DB to hip with full lat stretch at bottom",
+        target_reps: "8-10",
+        default_weight: 65,
+        notes: "Weight Overload Bump: 65 lbs DBs for 8-10 reps (blew past 10 reps on Friday with 60 lbs x 12)",
         aliases: ["Barbell Bent-Over Row"],
+        planned_sets: [
+          { weight: 65, reps: 10 },
+          { weight: 65, reps: 10 },
+          { weight: 65, reps: 8 },
+        ],
       },
       {
-        name: "Tricep Rope Pushdown",
+        name: "Skull Crushers",
         muscle_group: "Arms",
         target_sets: 3,
-        target_reps: "10-12",
-        default_weight: 40,
-        notes: "Flare rope at bottom, lock out triceps to balance bicep volume",
-        aliases: ["Tricep Pushdown", "Tricep Rope Pushdowns"],
+        target_reps: "8-10",
+        default_weight: 60,
+        notes: "Weight Overload Bump: 60 lbs for 8-10 reps (mastered 55 lbs x 10, 10, 10 on Friday)",
+        aliases: ["Tricep Rope Pushdown", "Tricep Pushdown", "Skull Crusher", "Lying Triceps Extension"],
+        planned_sets: [
+          { weight: 60, reps: 10 },
+          { weight: 60, reps: 10 },
+          { weight: 60, reps: 8 },
+        ],
       },
       {
         name: "Cable Lateral Raise",
         muscle_group: "Shoulders",
         target_sets: 3,
-        target_reps: "12-15",
+        target_reps: "11-12",
         default_weight: 15,
-        notes: "Scapular plane (30° forward), smooth continuous cable tension",
+        notes: "Rep Overload: 15 lbs for 11-12 clean reps with 2s eccentric before moving to 20 lbs",
         aliases: ["Dumbbell Lateral Raise", "Cable Lateral Raises"],
+        planned_sets: [
+          { weight: 15, reps: 12 },
+          { weight: 15, reps: 11 },
+          { weight: 15, reps: 11 },
+        ],
       },
       {
         name: "Cable Rear Delt Fly",
         muscle_group: "Shoulders",
         target_sets: 3,
         target_reps: "12-15",
-        default_weight: 20,
-        notes: "Reach wide to sides, squeeze posterior deltoids",
+        default_weight: 15,
+        notes: "Rep Overload: 15 lbs for 13-15 reps; test 20 lbs if first set hits 15 reps cleanly",
+        planned_sets: [
+          { weight: 15, reps: 13 },
+          { weight: 15, reps: 13 },
+          { weight: 15, reps: 14 },
+        ],
       },
       {
         name: "Barbell Bicep Curl",
         muscle_group: "Arms",
         target_sets: 3,
-        target_reps: "10-12",
+        target_reps: "8-10",
         default_weight: 35,
-        notes: "Supinate at top, strict eccentric for bicep peak",
+        notes: "Density Overload: target 27+ total reps at 35 lbs (10, 9, 8) to beat Friday's 25 reps with strict form",
         aliases: ["Bicep Curl", "Dumbbell Bicep Curl", "Bicep Curls (DB or Cable)"],
+        planned_sets: [
+          { weight: 35, reps: 10 },
+          { weight: 35, reps: 9 },
+          { weight: 35, reps: 8 },
+        ],
       },
     ],
   },
@@ -517,23 +592,36 @@ export async function GET(req: NextRequest) {
       // Ensure progressive overload target is prioritized if higher than previous back-off set
       bestWeight = Math.max(bestWeight, exDef.default_weight);
 
-      const sets: WorkoutSetData[] = Array.from(
-        { length: exDef.target_sets },
-        (_, idx) => ({
-          exercise_name: exDef.name,
-          set_number: idx + 1,
-          weight: bestWeight,
-          reps: bestReps,
-          completed: false,
-        })
-      );
+      // Build sets: prefer explicitly defined planned_sets for progressive overload, otherwise fallback to target/history
+      const sets: WorkoutSetData[] = exDef.planned_sets && exDef.planned_sets.length > 0
+        ? exDef.planned_sets.map((ps, idx) => ({
+            exercise_name: exDef.name,
+            set_number: idx + 1,
+            weight: ps.weight,
+            reps: ps.reps,
+            completed: false,
+          }))
+        : Array.from(
+            { length: exDef.target_sets },
+            (_, idx) => ({
+              exercise_name: exDef.name,
+              set_number: idx + 1,
+              weight: bestWeight,
+              reps: bestReps,
+              completed: false,
+            })
+          );
+
+      const targetWeight = exDef.planned_sets && exDef.planned_sets.length > 0
+        ? exDef.planned_sets[0].weight
+        : bestWeight;
 
       exercises.push({
         name: exDef.name,
         muscle_group: exDef.muscle_group,
         target_sets: exDef.target_sets,
         target_reps: exDef.target_reps,
-        target_weight: bestWeight,
+        target_weight: targetWeight,
         notes: exDef.notes,
         sets,
       });

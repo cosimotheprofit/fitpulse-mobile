@@ -21,7 +21,8 @@ import {
   Calendar,
   Utensils,
   Scale,
-  BookOpen
+  BookOpen,
+  RefreshCw
 } from "lucide-react";
 import { WorkoutSessionData, WorkoutExerciseData, WorkoutSetData } from "@/types/workout";
 import HistoryTab from "@/components/HistoryTab";
@@ -159,7 +160,10 @@ export default function MobileGymApp() {
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
-          if (parsed && parsed.date === today && parsed.status === "in_progress") {
+          const hasAnyCompletedSets = parsed && parsed.exercises?.some(
+            (ex: WorkoutExerciseData) => ex.sets?.some((s: WorkoutSetData) => s.completed)
+          );
+          if (parsed && parsed.date === today && parsed.status === "in_progress" && hasAnyCompletedSets) {
             setWorkout(parsed);
             hasActiveLocalWorkout = true;
           } else if (parsed && parsed.status === "completed") {
@@ -432,11 +436,11 @@ export default function MobileGymApp() {
           name: "Barbell Bench Press",
           target_sets: 3,
           target_weight: 135,
-          target_reps: "5-8",
+          target_reps: "8",
           sets: [
-            { exercise_name: "Barbell Bench Press", set_number: 1, weight: 135, reps: 6, completed: false },
-            { exercise_name: "Barbell Bench Press", set_number: 2, weight: 135, reps: 6, completed: false },
-            { exercise_name: "Barbell Bench Press", set_number: 3, weight: 135, reps: 5, completed: false },
+            { exercise_name: "Barbell Bench Press", set_number: 1, weight: 135, reps: 8, completed: false },
+            { exercise_name: "Barbell Bench Press", set_number: 2, weight: 135, reps: 8, completed: false },
+            { exercise_name: "Barbell Bench Press", set_number: 3, weight: 135, reps: 8, completed: false },
           ],
         },
       ],
@@ -561,6 +565,13 @@ export default function MobileGymApp() {
             </span>
           )}
           <button
+            onClick={() => handleLoadRoutine("A")}
+            title="Reload Routine Targets"
+            className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-emerald-400 active:bg-zinc-800"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+          </button>
+          <button
             onClick={handleLockApp}
             title="Lock App"
             className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-zinc-200 active:bg-zinc-800"
@@ -604,10 +615,10 @@ export default function MobileGymApp() {
                 <Play className="w-4 h-4 fill-zinc-950" /> Start Today: Leg Day (Hack Squats &amp; RDLs)
               </button>
               <button
-                onClick={() => handleLoadRoutine("A_UPPER")}
+                onClick={() => handleLoadRoutine("A")}
                 className="w-full py-2.5 px-4 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold rounded-xl border border-emerald-500/30 text-xs transition-all flex items-center justify-center gap-2"
               >
-                <Play className="w-3.5 h-3.5 fill-emerald-400" /> Start Workout A (Bench, Rows &amp; Arms)
+                <Play className="w-3.5 h-3.5 fill-emerald-400" /> Start Workout A (Full Body Overload)
               </button>
               <button
                 onClick={() => handleLoadRoutine("B")}
@@ -665,7 +676,7 @@ export default function MobileGymApp() {
               </button>
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => handleLoadRoutine("A_UPPER")}
+                  onClick={() => handleLoadRoutine("A")}
                   className="py-2 px-3 bg-zinc-900 hover:bg-zinc-800 text-emerald-400 font-semibold rounded-xl border border-emerald-500/20 text-[11px] transition-all flex items-center justify-center gap-1.5"
                 >
                   <Play className="w-3 h-3 fill-emerald-400" /> Workout A
@@ -729,7 +740,7 @@ export default function MobileGymApp() {
                   🦵 Leg Day
                 </button>
                 <button
-                  onClick={() => handleLoadRoutine("A_UPPER")}
+                  onClick={() => handleLoadRoutine("A")}
                   className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all ${workout.title.includes("Workout A") || workout.title.includes("Full Body A") ? "bg-emerald-500 text-zinc-950 shadow-sm" : "bg-zinc-800/90 text-emerald-400 hover:bg-zinc-750 border border-emerald-500/30"}`}
                 >
                   Workout A
@@ -806,6 +817,11 @@ export default function MobileGymApp() {
                           {exercise.target_sets} sets × {exercise.target_reps || "reps"}
                           {exercise.target_weight ? ` @ ${exercise.target_weight} lbs` : ""}
                         </p>
+                        {exercise.notes && (
+                          <p className="text-[10px] text-emerald-400 mt-0.5 font-medium leading-tight">
+                            🎯 {exercise.notes}
+                          </p>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-2">
