@@ -708,6 +708,11 @@ export default function MobileGymApp() {
                   <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded-md inline-block mb-1">
                     {workout.status === "in_progress" ? "In Progress" : "Queued Routine"}
                   </span>
+                  {(workout.title?.toLowerCase().includes("deload") || workout.notes?.toLowerCase().includes("deload")) && (
+                    <span className="text-[10px] font-black uppercase tracking-wider text-teal-300 bg-teal-950/70 border border-teal-700/50 px-2 py-0.5 rounded-md inline-block mb-1 ml-1.5 shadow-sm">
+                      🌱 Deload Week (2 Sets / Ex)
+                    </span>
+                  )}
                   <h2 className="text-lg font-extrabold text-zinc-100 tracking-tight">{workout.title}</h2>
                   {workout.notes && <p className="text-xs text-zinc-400 mt-1 italic">&ldquo;{workout.notes}&rdquo;</p>}
                 </div>

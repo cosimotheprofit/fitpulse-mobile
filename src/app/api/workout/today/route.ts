@@ -390,6 +390,270 @@ const SCHEDULED_ROUTINES: Record<
       },
     ],
   },
+  A_DELOAD: {
+    code: "A_DELOAD",
+    title: "Full Body A (Deload)",
+    notes: "Deload Week: 2 sets/exercise matching Monday Nov 2 volume (6,430 lbs) for CNS & connective tissue recovery",
+    exercises: [
+      {
+        name: "Barbell Bench Press",
+        muscle_group: "Chest",
+        target_sets: 2,
+        target_reps: "10-12",
+        default_weight: 115,
+        notes: "Deload: 2 working sets @ 105-115 lbs. Smooth pause on chest, clean bar path",
+        planned_sets: [
+          { weight: 105, reps: 10 },
+          { weight: 115, reps: 12 },
+        ],
+      },
+      {
+        name: "Dumbbell Bent-Over Row",
+        muscle_group: "Back",
+        target_sets: 2,
+        target_reps: "10",
+        default_weight: 50,
+        notes: "Deload: 2 sets @ 50 lbs. Full lat stretch, controlled tempo",
+        aliases: ["Barbell Bent-Over Row"],
+        planned_sets: [
+          { weight: 50, reps: 10 },
+          { weight: 50, reps: 10 },
+        ],
+      },
+      {
+        name: "Cable Lateral Raise",
+        muscle_group: "Shoulders",
+        target_sets: 2,
+        target_reps: "10",
+        default_weight: 15,
+        notes: "Deload: 2 sets @ 15 lbs. Scapular plane, smooth tension",
+        aliases: ["Dumbbell Lateral Raise", "Cable Lateral Raises"],
+        planned_sets: [
+          { weight: 15, reps: 10 },
+          { weight: 15, reps: 10 },
+        ],
+      },
+      {
+        name: "Cable Rear Delt Fly",
+        muscle_group: "Shoulders",
+        target_sets: 2,
+        target_reps: "10",
+        default_weight: 15,
+        notes: "Deload: 2 sets @ 15 lbs. Squeeze rear delts to reset posture",
+        planned_sets: [
+          { weight: 15, reps: 10 },
+          { weight: 15, reps: 10 },
+        ],
+      },
+      {
+        name: "Barbell Bicep Curl",
+        muscle_group: "Arms",
+        target_sets: 2,
+        target_reps: "10",
+        default_weight: 60,
+        notes: "Deload: 2 sets @ 60 lbs. Strict form, elbows pinned",
+        aliases: ["Bicep Curl", "Barbell / Cable Bicep Curls"],
+        planned_sets: [
+          { weight: 60, reps: 10 },
+          { weight: 60, reps: 10 },
+        ],
+      },
+      {
+        name: "Skull Crushers",
+        muscle_group: "Arms",
+        target_sets: 2,
+        target_reps: "10",
+        default_weight: 60,
+        notes: "Deload: 2 sets @ 60 lbs. Elbows in, smooth triceps long head stretch",
+        aliases: ["Skull Crusher", "EZ Bar Skull Crusher"],
+        planned_sets: [
+          { weight: 60, reps: 10 },
+          { weight: 60, reps: 10 },
+        ],
+      },
+    ],
+  },
+  B_DELOAD: {
+    code: "B_DELOAD",
+    title: "Full Body B (Deload)",
+    notes: "Deload Week: 2 sets/exercise matching Monday's recovery volume (~5,500–6,000 lbs)",
+    exercises: [
+      {
+        name: "Incline Bench",
+        muscle_group: "Chest",
+        target_sets: 2,
+        target_reps: "8-10",
+        default_weight: 95,
+        notes: "Deload: 2 sets @ 95-105 lbs. 30° incline, controlled 3s eccentric, pause at clavicle",
+        aliases: ["Incline Dumbbell Press", "Incline Barbell Bench"],
+        planned_sets: [
+          { weight: 95, reps: 10 },
+          { weight: 105, reps: 8 },
+        ],
+      },
+      {
+        name: "Pull-ups",
+        muscle_group: "Back",
+        target_sets: 2,
+        target_reps: "5-6",
+        default_weight: -20,
+        notes: "Deload: 2 sets with moderate assistance (-20 lbs) or easy BW, full dead-hang stretch",
+        aliases: ["Assisted Pull-ups", "Pull-ups (Strict Dead Hang)"],
+        planned_sets: [
+          { weight: -20, reps: 6 },
+          { weight: -20, reps: 6 },
+        ],
+      },
+      {
+        name: "Leg Curl",
+        muscle_group: "Legs",
+        target_sets: 2,
+        target_reps: "10",
+        default_weight: 135,
+        notes: "Deload: 2 sets @ 135 lbs. Slow 2s negative, gentle hamstring squeeze",
+        aliases: ["Lying Leg Curl", "Seated Leg Curl", "Leg Curl Cor"],
+        planned_sets: [
+          { weight: 135, reps: 10 },
+          { weight: 135, reps: 10 },
+        ],
+      },
+      {
+        name: "Leg Extension",
+        muscle_group: "Legs",
+        target_sets: 2,
+        target_reps: "10",
+        default_weight: 125,
+        notes: "Deload: 2 sets @ 125 lbs. Constant quad blood flow, pause 1s at top",
+        planned_sets: [
+          { weight: 125, reps: 10 },
+          { weight: 125, reps: 10 },
+        ],
+      },
+      {
+        name: "Cable Lateral Raise",
+        muscle_group: "Shoulders",
+        target_sets: 2,
+        target_reps: "10",
+        default_weight: 15,
+        notes: "Deload: 2 sets @ 15 lbs. Smooth side delt isolation",
+        aliases: ["Dumbbell Lateral Raise", "Cable Lateral Raises"],
+        planned_sets: [
+          { weight: 15, reps: 10 },
+          { weight: 15, reps: 10 },
+        ],
+      },
+      {
+        name: "Face Pull",
+        muscle_group: "Shoulders",
+        target_sets: 2,
+        target_reps: "10-12",
+        default_weight: 45,
+        notes: "Deload: 2 sets @ 45-50 lbs. Rotator cuff recovery, pull to eye line",
+        aliases: ["Face Pulls"],
+        planned_sets: [
+          { weight: 45, reps: 12 },
+          { weight: 50, reps: 10 },
+        ],
+      },
+      {
+        name: "Barbell Bicep Curl",
+        muscle_group: "Arms",
+        target_sets: 2,
+        target_reps: "10",
+        default_weight: 55,
+        notes: "Deload: 2 sets @ 55 lbs. Brachialis pump, strict bilateral form",
+        aliases: ["Bicep Curl", "Barbell / Cable Bicep Curls"],
+        planned_sets: [
+          { weight: 55, reps: 10 },
+          { weight: 55, reps: 10 },
+        ],
+      },
+    ],
+  },
+  LEGS_DELOAD: {
+    code: "LEGS_DELOAD",
+    title: "Leg Day (Deload)",
+    notes: "Deload Week: Lower Body Recovery & Joint Decompression — 2 sets per exercise",
+    exercises: [
+      {
+        name: "Hack Squat Machine",
+        muscle_group: "Legs",
+        target_sets: 2,
+        target_reps: "8-10",
+        default_weight: 70,
+        notes: "Deload: 2 sets @ 70-80 lbs. Deep knee travel, smooth tempo",
+        aliases: ["Hack Squat"],
+        planned_sets: [
+          { weight: 70, reps: 10 },
+          { weight: 80, reps: 10 },
+        ],
+      },
+      {
+        name: "Dumbbell Romanian Deadlift",
+        muscle_group: "Legs",
+        target_sets: 2,
+        target_reps: "8-10",
+        default_weight: 40,
+        notes: "Deload: 2 sets @ 40 lbs / hand. Active hamstring stretch, smooth hinge",
+        aliases: ["Romanian Deadlift", "Dumbbell RDL", "RDL"],
+        planned_sets: [
+          { weight: 40, reps: 10 },
+          { weight: 40, reps: 10 },
+        ],
+      },
+      {
+        name: "Leg Press",
+        muscle_group: "Legs",
+        target_sets: 2,
+        target_reps: "10",
+        default_weight: 270,
+        notes: "Deload: 2 sets @ 270 lbs. Moderate load flush pump, smooth cadence",
+        aliases: ["Horizontal Leg Press", "Cybex Leg Press"],
+        planned_sets: [
+          { weight: 270, reps: 10 },
+          { weight: 270, reps: 10 },
+        ],
+      },
+      {
+        name: "Leg Curl",
+        muscle_group: "Legs",
+        target_sets: 2,
+        target_reps: "8-10",
+        default_weight: 135,
+        notes: "Deload: 2 sets @ 135 lbs. Slow negative, squeeze hamstrings without strain",
+        aliases: ["Lying Leg Curl", "Seated Leg Curl"],
+        planned_sets: [
+          { weight: 135, reps: 10 },
+          { weight: 135, reps: 10 },
+        ],
+      },
+      {
+        name: "Leg Extension",
+        muscle_group: "Legs",
+        target_sets: 2,
+        target_reps: "10",
+        default_weight: 125,
+        notes: "Deload: 2 sets @ 125 lbs. Constant quad blood flow, pause 1s at top",
+        planned_sets: [
+          { weight: 125, reps: 10 },
+          { weight: 125, reps: 10 },
+        ],
+      },
+      {
+        name: "Ab machine",
+        muscle_group: "Core",
+        target_sets: 2,
+        target_reps: "12-15",
+        default_weight: 130,
+        notes: "Deload: 2 sets @ 130 lbs. Controlled crunch, rib-to-pelvis contraction",
+        aliases: ["Ab Machine"],
+        planned_sets: [
+          { weight: 130, reps: 15 },
+          { weight: 130, reps: 15 },
+        ],
+      },
+    ],
+  },
 };
 
 export async function GET(req: NextRequest) {
@@ -425,8 +689,8 @@ export async function GET(req: NextRequest) {
       // should not hijack the following day's schedule)
       if (!sessionRow) {
         const todaySessionRes = await db.execute({
-          sql: `SELECT * FROM workout_sessions WHERE start_time LIKE ? AND end_time IS NOT NULL ORDER BY id DESC LIMIT 1`,
-          args: [`${todayStr}%`],
+          sql: `SELECT * FROM workout_sessions WHERE (start_time LIKE ? OR date(start_time, '-5 hours') = ?) AND end_time IS NOT NULL ORDER BY id DESC LIMIT 1`,
+          args: [`${todayStr}%`, todayStr],
         });
         sessionRow = todaySessionRes.rows[0];
       }
@@ -518,8 +782,25 @@ export async function GET(req: NextRequest) {
     let routineKey: string | null = requestedRoutine?.toUpperCase() || null;
     let isVacation = false;
 
+    // Check if within Deload Week: Monday Nov 2 to Sunday Nov 8, 2026
+    const isDeloadWeek = todayStr >= "2026-11-02" && todayStr <= "2026-11-08";
+
+    if (routineKey && isDeloadWeek) {
+      if (routineKey === "A" || routineKey === "A_UPPER") routineKey = "A_DELOAD";
+      else if (routineKey === "B") routineKey = "B_DELOAD";
+      else if (routineKey === "LEGS" || routineKey === "LEGS_SAT") routineKey = "LEGS_DELOAD";
+    }
+
     if (!routineKey) {
-      if (todayStr === "2026-09-21") {
+      if (isDeloadWeek) {
+        if (dayOfWeek === 1 || dayOfWeek === 5) {
+          routineKey = "A_DELOAD"; // Mon Nov 2 & Fri Nov 6: Full Body A (Deload)
+        } else if (dayOfWeek === 3) {
+          routineKey = "B_DELOAD"; // Wed Nov 4: Full Body B (Deload)
+        } else if (dayOfWeek === 6) {
+          routineKey = "LEGS_DELOAD"; // Sat Nov 7: Leg Day (Deload)
+        }
+      } else if (todayStr === "2026-09-21") {
         routineKey = "A_UPPER"; // Monday Sep 21: Upper Body Mass (legs resting after overnight session 30)
       } else if (todayStr === "2026-09-24") {
         routineKey = "LEGS"; // Pre-vacation leg overload
