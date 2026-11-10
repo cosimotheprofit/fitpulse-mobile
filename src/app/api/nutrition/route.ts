@@ -11,12 +11,7 @@ export async function GET(req: NextRequest) {
     let date = searchParams.get("date");
 
     if (!date) {
-      // Find latest date with nutrition logs or default to today
-      const latestDateRes = await db.execute(`
-        SELECT date FROM nutrition_logs ORDER BY date DESC LIMIT 1
-      `);
-      const todayStr = new Date().toISOString().split("T")[0];
-      date = latestDateRes.rows[0]?.date ? String(latestDateRes.rows[0].date) : todayStr;
+      date = new Date().toISOString().split("T")[0];
     }
 
     // Fetch user settings / goals
