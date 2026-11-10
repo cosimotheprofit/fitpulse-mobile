@@ -403,10 +403,12 @@ export default function MobileGymApp() {
       });
 
       if (res.ok) {
+        const resData = await res.json().catch(() => ({}));
         const completedWorkout: WorkoutSessionData = {
           ...workout,
+          id: resData.session_id || workout.id,
           status: "completed",
-          completed_at: new Date().toISOString(),
+          completed_at: resData.completed_at || new Date().toISOString(),
         };
         setWorkout(completedWorkout);
         localStorage.setItem("fitpulse_active_workout", JSON.stringify(completedWorkout));
@@ -607,32 +609,65 @@ export default function MobileGymApp() {
             <p className="text-xs text-zinc-400 max-w-xs mb-6 leading-relaxed">
               Muscles rebuild during rest when fueled by your 2,823 kcal (+275 kcal surplus) and 180g protein. Start your next routine whenever you&apos;re ready:
             </p>
-            <div className="flex flex-col gap-2.5 w-full max-w-xs">
-              <button
-                onClick={() => handleLoadRoutine("LEGS_SAT")}
-                className="w-full py-3 px-4 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-zinc-950 font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-amber-950/40 transition-all text-xs"
-              >
-                <Play className="w-4 h-4 fill-zinc-950" /> Start Today: Leg Day (Hack Squats &amp; RDLs)
-              </button>
-              <button
-                onClick={() => handleLoadRoutine("A")}
-                className="w-full py-2.5 px-4 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold rounded-xl border border-emerald-500/30 text-xs transition-all flex items-center justify-center gap-2"
-              >
-                <Play className="w-3.5 h-3.5 fill-emerald-400" /> Start Workout A (Full Body Overload)
-              </button>
-              <button
-                onClick={() => handleLoadRoutine("B")}
-                className="w-full py-2.5 px-4 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-850 text-cyan-400 font-semibold rounded-xl border border-cyan-500/30 text-xs transition-all flex items-center justify-center gap-2"
-              >
-                <Play className="w-3.5 h-3.5 fill-cyan-400" /> Start Workout B (Incline &amp; Pull-ups)
-              </button>
-              <button
-                onClick={handleStartManualWorkout}
-                className="w-full py-2 px-4 bg-zinc-900/60 hover:bg-zinc-850 text-zinc-400 text-xs rounded-xl border border-zinc-800 transition-all flex items-center justify-center gap-1.5"
-              >
-                Start Empty Session
-              </button>
-            </div>
+            {(() => {
+              const dow = new Date().getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+              const isLegDay = dow === 0 || dow === 6;
+              const isB = dow === 3;
+              const primaryRoutine = isLegDay ? "LEGS_SAT" : isB ? "B" : "A";
+              const primaryLabel = isLegDay
+                ? "Start Leg Day (Hack Squats & RDLs)"
+                : isB
+                ? "Start Workout B (Incline & Pull-ups)"
+                : "Start Workout A (Bench, Rows & Arms)";
+              const primaryColor = isLegDay
+                ? "bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-zinc-950"
+                : isB
+                ? "bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-zinc-950"
+                : "bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-zinc-950";
+
+              return (
+                <div className="flex flex-col gap-2.5 w-full max-w-xs">
+                  <button
+                    onClick={() => handleLoadRoutine(primaryRoutine)}
+                    className={`w-full py-3 px-4 ${primaryColor} font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all text-xs`}
+                  >
+                    <Play className="w-4 h-4 fill-current" /> {primaryLabel}
+                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    {primaryRoutine !== "A" && (
+                      <button
+                        onClick={() => handleLoadRoutine("A")}
+                        className="py-2.5 px-3 bg-zinc-900 hover:bg-zinc-800 text-emerald-400 font-semibold rounded-xl border border-emerald-500/20 text-[11px] transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Play className="w-3 h-3 fill-emerald-400" /> Workout A (Upper)
+                      </button>
+                    )}
+                    {primaryRoutine !== "B" && (
+                      <button
+                        onClick={() => handleLoadRoutine("B")}
+                        className="py-2.5 px-3 bg-zinc-900 hover:bg-zinc-800 text-cyan-400 font-semibold rounded-xl border border-cyan-500/20 text-[11px] transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Play className="w-3 h-3 fill-cyan-400" /> Workout B (Incline)
+                      </button>
+                    )}
+                    {primaryRoutine !== "LEGS_SAT" && (
+                      <button
+                        onClick={() => handleLoadRoutine("LEGS_SAT")}
+                        className="py-2.5 px-3 bg-zinc-900 hover:bg-zinc-800 text-amber-400 font-semibold rounded-xl border border-amber-500/20 text-[11px] transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Play className="w-3 h-3 fill-amber-400" /> Leg Day
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleStartManualWorkout}
+                    className="w-full py-2 px-4 bg-zinc-900/60 hover:bg-zinc-850 text-zinc-400 text-xs rounded-xl border border-zinc-800 transition-all flex items-center justify-center gap-1.5"
+                  >
+                    Start Empty Session
+                  </button>
+                </div>
+              );
+            })()}
           </div>
         ) : workout.status === "completed" ? (
           // Workout Completed Screen
@@ -667,36 +702,67 @@ export default function MobileGymApp() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-2.5 w-full max-w-xs">
-              <button
-                onClick={() => handleLoadRoutine("LEGS_SAT")}
-                className="w-full py-3 px-4 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-zinc-950 font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-amber-950/40 transition-all text-xs"
-              >
-                <Play className="w-4 h-4 fill-zinc-950" /> Start Today: Leg Day (Hack Squats &amp; RDLs)
-              </button>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => handleLoadRoutine("A")}
-                  className="py-2 px-3 bg-zinc-900 hover:bg-zinc-800 text-emerald-400 font-semibold rounded-xl border border-emerald-500/20 text-[11px] transition-all flex items-center justify-center gap-1.5"
-                >
-                  <Play className="w-3 h-3 fill-emerald-400" /> Workout A
-                </button>
-                <button
-                  onClick={() => handleLoadRoutine("B")}
-                  className="py-2 px-3 bg-zinc-900 hover:bg-zinc-800 text-cyan-400 font-semibold rounded-xl border border-cyan-500/20 text-[11px] transition-all flex items-center justify-center gap-1.5"
-                >
-                  <Play className="w-3 h-3 fill-cyan-400" /> Workout B
-                </button>
-              </div>
-              <button
-                onClick={() => {
-                  setWorkout({ ...workout, status: "in_progress" });
-                }}
-                className="py-2 px-4 bg-zinc-850 hover:bg-zinc-800 text-zinc-400 rounded-xl text-xs transition-all border border-zinc-800"
-              >
-                Edit Completed Workout
-              </button>
-            </div>
+            {(() => {
+              const dow = new Date().getDay();
+              const isLegDay = dow === 0 || dow === 6;
+              const isB = dow === 3;
+              const nextRoutine = isLegDay ? "LEGS_SAT" : isB ? "B" : "A";
+              const nextLabel = isLegDay
+                ? "Start Leg Day (Hack Squats & RDLs)"
+                : isB
+                ? "Start Workout B (Incline & Pull-ups)"
+                : "Start Workout A (Bench, Rows & Arms)";
+              const nextColor = isLegDay
+                ? "bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-zinc-950"
+                : isB
+                ? "bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-zinc-950"
+                : "bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-zinc-950";
+
+              return (
+                <div className="flex flex-col gap-2.5 w-full max-w-xs">
+                  <button
+                    onClick={() => handleLoadRoutine(nextRoutine)}
+                    className={`w-full py-3 px-4 ${nextColor} font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all text-xs`}
+                  >
+                    <Play className="w-4 h-4 fill-current" /> {nextLabel}
+                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    {nextRoutine !== "A" && (
+                      <button
+                        onClick={() => handleLoadRoutine("A")}
+                        className="py-2.5 px-3 bg-zinc-900 hover:bg-zinc-800 text-emerald-400 font-semibold rounded-xl border border-emerald-500/20 text-[11px] transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Play className="w-3 h-3 fill-emerald-400" /> Workout A (Upper)
+                      </button>
+                    )}
+                    {nextRoutine !== "B" && (
+                      <button
+                        onClick={() => handleLoadRoutine("B")}
+                        className="py-2.5 px-3 bg-zinc-900 hover:bg-zinc-800 text-cyan-400 font-semibold rounded-xl border border-cyan-500/20 text-[11px] transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Play className="w-3 h-3 fill-cyan-400" /> Workout B (Incline)
+                      </button>
+                    )}
+                    {nextRoutine !== "LEGS_SAT" && (
+                      <button
+                        onClick={() => handleLoadRoutine("LEGS_SAT")}
+                        className="py-2.5 px-3 bg-zinc-900 hover:bg-zinc-800 text-amber-400 font-semibold rounded-xl border border-amber-500/20 text-[11px] transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Play className="w-3 h-3 fill-amber-400" /> Leg Day
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setWorkout({ ...workout, status: "in_progress" });
+                    }}
+                    className="py-2 px-4 bg-zinc-850 hover:bg-zinc-800 text-zinc-400 rounded-xl text-xs transition-all border border-zinc-800"
+                  >
+                    Edit Completed Workout
+                  </button>
+                </div>
+              );
+            })()}
           </div>
         ) : (
           // Active Workout Session View

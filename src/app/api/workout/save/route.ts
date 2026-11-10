@@ -102,6 +102,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `Workout #${sessionId} saved directly to FitPulse database!`,
+      session_id: sessionId,
       status: body.status,
       completed_at: isFinishing ? nowIso : null,
     });

@@ -24,6 +24,32 @@ interface SetDetail {
   completed: boolean;
 }
 
+function formatSessionDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return "Recent";
+  let iso = dateStr.replace(" ", "T");
+  if (!iso.includes("Z") && !iso.includes("+") && !iso.includes("-", 10)) {
+    iso += "Z";
+  }
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) {
+    return dateStr.split(" ")[0] || "Recent";
+  }
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = d.toDateString() === yesterday.toDateString();
+
+  if (isToday) return "Today";
+  if (isYesterday) return "Yesterday";
+
+  return d.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export default function HistoryTab() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,11 +130,7 @@ export default function HistoryTab() {
         sessions.map((s) => {
           const isExpanded = expandedId === s.id;
           const sets = sessionSets[s.id] || [];
-          const dateStr = s.start_time ? new Date(s.start_time).toLocaleDateString(undefined, {
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-          }) : "Recent";
+          const dateStr = formatSessionDate(s.start_time);
 
           return (
             <div
