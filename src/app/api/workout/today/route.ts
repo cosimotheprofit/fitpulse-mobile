@@ -699,8 +699,8 @@ export async function GET(req: NextRequest) {
       // should not hijack the following day's schedule)
       if (!sessionRow) {
         const todaySessionRes = await db.execute({
-          sql: `SELECT * FROM workout_sessions WHERE (start_time LIKE ? OR date(start_time, '-5 hours') = ?) AND end_time IS NOT NULL ORDER BY id DESC LIMIT 1`,
-          args: [`${todayStr}%`, todayStr],
+          sql: `SELECT * FROM workout_sessions WHERE (start_time LIKE ? OR date(start_time, '-5 hours') = ? OR date(start_time, '-6 hours') = ?) AND end_time IS NOT NULL ORDER BY id DESC LIMIT 1`,
+          args: [`${todayStr}%`, todayStr, todayStr],
         });
         sessionRow = todaySessionRes.rows[0];
       }
