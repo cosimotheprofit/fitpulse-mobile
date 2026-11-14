@@ -31,10 +31,19 @@ export async function GET(req: NextRequest) {
         args: [Number(sessionId)],
       });
 
-      return NextResponse.json({
-        session: sessionRes.rows[0],
-        sets: setsRes.rows,
-      });
+      return NextResponse.json(
+        {
+          session: sessionRes.rows[0],
+          sets: setsRes.rows,
+        },
+        {
+          headers: {
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+        }
+      );
     }
 
     // List recent sessions
@@ -47,12 +56,21 @@ export async function GET(req: NextRequest) {
       LEFT JOIN workout_sets ws ON s.id = ws.session_id
       GROUP BY s.id
       ORDER BY s.start_time DESC
-      LIMIT 50
+      LIMIT 100
     `);
 
-    return NextResponse.json({
-      sessions: sessionsRes.rows,
-    });
+    return NextResponse.json(
+      {
+        sessions: sessionsRes.rows,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      }
+    );
   } catch (err: unknown) {
     console.error("Failed to fetch workout history:", err);
     return NextResponse.json(

@@ -176,7 +176,10 @@ export default function MobileGymApp() {
       }
 
       // 2. Fetch latest from server with local calendar date
-      const res = await fetch(`/api/workout/today?date=${today}`);
+      const res = await fetch(`/api/workout/today?date=${today}&t=${Date.now()}`, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.workout) {

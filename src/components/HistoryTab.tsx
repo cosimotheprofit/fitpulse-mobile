@@ -60,7 +60,10 @@ export default function HistoryTab() {
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/history");
+      const res = await fetch(`/api/history?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+      });
       if (res.ok) {
         const data = await res.json();
         setSessions(data.sessions || []);
@@ -86,7 +89,10 @@ export default function HistoryTab() {
     if (!sessionSets[sessionId]) {
       setLoadingSets((prev) => ({ ...prev, [sessionId]: true }));
       try {
-        const res = await fetch(`/api/history?session_id=${sessionId}`);
+        const res = await fetch(`/api/history?session_id=${sessionId}&t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
+        });
         if (res.ok) {
           const data = await res.json();
           setSessionSets((prev) => ({ ...prev, [sessionId]: data.sets || [] }));
