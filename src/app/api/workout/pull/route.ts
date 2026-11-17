@@ -57,9 +57,9 @@ export async function GET(req: NextRequest) {
 
     const setsRes = await db.execute({
       sql: `
-        SELECT ws.*, e.name as exercise_name, e.muscle_group, e.category
+        SELECT ws.*, COALESCE(e.name, 'Exercise #' || ws.exercise_id) as exercise_name, COALESCE(e.muscle_group, 'Other') as muscle_group, e.category
         FROM workout_sets ws
-        JOIN exercises e ON ws.exercise_id = e.id
+        LEFT JOIN exercises e ON ws.exercise_id = e.id
         WHERE ws.session_id = ?
         ORDER BY ws.id ASC
       `,

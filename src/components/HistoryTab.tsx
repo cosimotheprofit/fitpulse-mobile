@@ -190,7 +190,7 @@ export default function HistoryTab() {
                           className="flex items-center justify-between text-xs py-1.5 px-2 rounded-lg bg-zinc-900/60 border border-zinc-800/40"
                         >
                           <span className="font-semibold text-zinc-200">
-                            {st.exercise_name} <span className="text-zinc-500 text-[10px]">Set #{st.set_number}</span>
+                            {st.exercise_name || `Exercise #${st.id}`} <span className="text-zinc-500 text-[10px]">Set #{st.set_number}</span>
                           </span>
                           <span className="font-mono font-bold text-emerald-400">
                             {st.weight} lbs × {st.reps} reps
