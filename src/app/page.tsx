@@ -455,18 +455,18 @@ export default function MobileGymApp() {
   };
 
   // Calculate quick metrics
-  const totalCompletedSets = workout
-    ? workout.exercises.reduce((acc, ex) => acc + ex.sets.filter((s) => s.completed).length, 0)
+  const totalCompletedSets = workout && workout.exercises
+    ? workout.exercises.reduce((acc, ex) => acc + (ex.sets || []).filter((s) => s.completed).length, 0)
     : 0;
-  const totalPlannedSets = workout
-    ? workout.exercises.reduce((acc, ex) => acc + ex.sets.length, 0)
+  const totalPlannedSets = workout && workout.exercises
+    ? workout.exercises.reduce((acc, ex) => acc + (ex.sets || []).length, 0)
     : 0;
-  const totalVolume = workout
+  const totalVolume = workout && workout.exercises
     ? workout.exercises.reduce(
         (acc, ex) =>
           acc +
-          ex.sets.reduce(
-            (sAcc, s) => sAcc + (s.completed ? s.weight * (s.reps > 0 ? s.reps : 10) : 0),
+          (ex.sets || []).reduce(
+            (sAcc, s) => sAcc + (s.completed ? (Number(s.weight) || 0) * ((Number(s.reps) || 0) > 0 ? Number(s.reps) : 10) : 0),
             0
           ),
         0
@@ -680,7 +680,11 @@ export default function MobileGymApp() {
             </div>
             <h2 className="text-xl font-black tracking-tight text-zinc-100 mb-1">Workout Complete! 🔥</h2>
             <p className="text-xs text-zinc-400 mb-6 font-medium">
-              Finished at {new Date(workout.completed_at || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              Finished at {(() => {
+                const raw = workout.completed_at ? String(workout.completed_at).replace(" ", "T") : null;
+                const d = raw ? new Date(raw) : new Date();
+                return !isNaN(d.getTime()) ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : (workout.completed_at || "Recent");
+              })()}
             </p>
 
             <div className="grid grid-cols-2 gap-3 w-full mb-6">
@@ -809,19 +813,19 @@ export default function MobileGymApp() {
                 <span className="text-[10px] uppercase font-bold text-zinc-400 mr-1">Switch:</span>
                 <button
                   onClick={() => handleLoadRoutine("LEGS_SAT")}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${workout.title.includes("Leg") ? "bg-amber-500 text-zinc-950 shadow-sm" : "bg-zinc-800/90 text-amber-300 hover:bg-zinc-750 border border-amber-500/30"}`}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${(workout.title || "").includes("Leg") ? "bg-amber-500 text-zinc-950 shadow-sm" : "bg-zinc-800/90 text-amber-300 hover:bg-zinc-750 border border-amber-500/30"}`}
                 >
                   🦵 Leg Day
                 </button>
                 <button
                   onClick={() => handleLoadRoutine("A")}
-                  className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all ${workout.title.includes("Workout A") || workout.title.includes("Full Body A") ? "bg-emerald-500 text-zinc-950 shadow-sm" : "bg-zinc-800/90 text-emerald-400 hover:bg-zinc-750 border border-emerald-500/30"}`}
+                  className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all ${(workout.title || "").includes("Workout A") || (workout.title || "").includes("Full Body A") ? "bg-emerald-500 text-zinc-950 shadow-sm" : "bg-zinc-800/90 text-emerald-400 hover:bg-zinc-750 border border-emerald-500/30"}`}
                 >
                   Workout A
                 </button>
                 <button
                   onClick={() => handleLoadRoutine("B")}
-                  className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all ${workout.title.includes("Workout B") || workout.title.includes("Full Body B") ? "bg-cyan-500 text-zinc-950 shadow-sm" : "bg-zinc-800/90 text-cyan-400 hover:bg-zinc-750 border border-cyan-500/30"}`}
+                  className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all ${(workout.title || "").includes("Workout B") || (workout.title || "").includes("Full Body B") ? "bg-cyan-500 text-zinc-950 shadow-sm" : "bg-zinc-800/90 text-cyan-400 hover:bg-zinc-750 border border-cyan-500/30"}`}
                 >
                   Workout B
                 </button>

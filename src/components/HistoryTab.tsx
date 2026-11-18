@@ -154,18 +154,18 @@ export default function HistoryTab() {
                     </span>
                     <span className="text-xs text-zinc-400">#{s.id}</span>
                   </div>
-                  <h3 className="text-sm font-bold text-zinc-100">{s.name}</h3>
+                  <h3 className="text-sm font-bold text-zinc-100">{s.name || "Workout Session"}</h3>
                   {s.notes && <p className="text-[11px] text-zinc-400 italic line-clamp-1">&ldquo;{s.notes}&rdquo;</p>}
                 </div>
 
                 <div className="text-right shrink-0 flex items-center gap-3">
                   <div>
                     <p className="text-xs font-bold text-zinc-100">
-                      {Math.round(s.total_volume_lbs).toLocaleString()}{" "}
+                      {Math.round(Number(s.total_volume_lbs) || 0).toLocaleString()}{" "}
                       <span className="text-[10px] text-zinc-500 font-normal">lbs</span>
                     </p>
                     <p className="text-[11px] text-zinc-400">
-                      {s.completed_sets || s.total_sets} sets
+                      {s.completed_sets || s.total_sets || 0} sets
                     </p>
                   </div>
                   {isExpanded ? (
@@ -184,16 +184,16 @@ export default function HistoryTab() {
                     <p className="text-xs text-zinc-500 text-center py-2">No sets logged for this session.</p>
                   ) : (
                     <div className="space-y-1.5">
-                      {sets.map((st) => (
+                      {sets.map((st, idx) => (
                         <div
-                          key={st.id}
+                          key={st.id || idx}
                           className="flex items-center justify-between text-xs py-1.5 px-2 rounded-lg bg-zinc-900/60 border border-zinc-800/40"
                         >
                           <span className="font-semibold text-zinc-200">
-                            {st.exercise_name || `Exercise #${st.id}`} <span className="text-zinc-500 text-[10px]">Set #{st.set_number}</span>
+                            {st.exercise_name || `Exercise`} <span className="text-zinc-500 text-[10px]">Set #{st.set_number || idx + 1}</span>
                           </span>
                           <span className="font-mono font-bold text-emerald-400">
-                            {st.weight} lbs × {st.reps} reps
+                            {st.weight || 0} lbs × {st.reps || 0} reps
                           </span>
                         </div>
                       ))}
