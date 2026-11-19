@@ -3,6 +3,8 @@ import { getDb, initDb } from "@/lib/db";
 import { WorkoutSessionData, WorkoutExerciseData, WorkoutSetData } from "@/types/workout";
 
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 interface RoutineExerciseDef {
   name: string;

@@ -3,6 +3,13 @@ import path from "path";
 
 let client: Client | null = null;
 
+const noCacheFetch: typeof fetch = (input, init) => {
+  return fetch(input, {
+    ...init,
+    cache: "no-store",
+  });
+};
+
 export function getDb(): Client {
   if (!client) {
     // When running locally, point directly to the main FitPulse fitness.db SQLite database
@@ -13,6 +20,7 @@ export function getDb(): Client {
     client = createClient({
       url,
       authToken,
+      fetch: noCacheFetch,
     });
   }
   return client;

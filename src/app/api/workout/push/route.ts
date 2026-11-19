@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb, initDb } from "@/lib/db";
 import { PushWorkoutPayload } from "@/types/workout";
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
 function checkAuth(req: NextRequest): boolean {
   const secret = process.env.API_SECRET;
   if (!secret) return true; // If no secret configured, allow access (MVP mode)

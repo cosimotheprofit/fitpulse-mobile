@@ -59,6 +59,8 @@ export default function HistoryTab() {
 
   const fetchHistory = async () => {
     setLoading(true);
+    setSessionSets({});
+    setExpandedId(null);
     try {
       const res = await fetch(`/api/history?t=${Date.now()}`, {
         cache: "no-store",
